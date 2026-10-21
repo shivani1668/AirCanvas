@@ -1,6 +1,11 @@
 import sys
 import os
 
+# Ensure current directory is in sys.path for Streamlit Cloud subfolder execution
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 # Check if running in headless Streamlit environment or if Tkinter/OpenCV GUI is unavailable
 try:
     import _tkinter

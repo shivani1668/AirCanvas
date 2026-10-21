@@ -1,3 +1,10 @@
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 import streamlit as st
 import numpy as np
 from PIL import Image
@@ -17,7 +24,6 @@ st.set_page_config(
 st.title("🎨 Air Canvas - AI Math Solver")
 st.caption("Draw or snap a picture of your math equation & let AI solve it!")
 
-# Sidebar Configuration
 st.sidebar.header("⚙️ Configuration")
 api_key = st.sidebar.text_input("Google Gemini API Key (Optional)", type="password")
 use_gemini = st.sidebar.checkbox("Use Gemini AI LLM", value=True)
