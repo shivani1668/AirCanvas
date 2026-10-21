@@ -1,8 +1,13 @@
 import streamlit as st
-import cv2
 import numpy as np
 from PIL import Image
 import io
+
+try:
+    import cv2
+    HAS_CV2 = True
+except ImportError:
+    HAS_CV2 = False
 
 from gemini_solver import GeminiMathSolver
 from offline_solver import OfflineMathEngine
@@ -13,7 +18,6 @@ st.set_page_config(page_title="Air Canvas - AI Math Solver (Python)", page_icon=
 st.title("🎨 Air Canvas - Draw Math, Let AI Solve! (Python)")
 st.caption("Generative AI & Computer Vision Mathematical Problem Solver built with Python")
 
-# Sidebar
 st.sidebar.header("⚙️ Configuration")
 api_key = st.sidebar.text_input("Google Gemini API Key (Optional)", type="password")
 use_gemini = st.sidebar.checkbox("Use Gemini AI LLM", value=True)
@@ -46,7 +50,6 @@ if uploaded_file is not None:
 
             st.info(f"### 💡 Final Answer: {result['final_answer']}")
 
-            # Plot Graph
             try:
                 graph_img = plot_equation_graph(result['expression'])
                 st.image(graph_img, caption="Matplotlib Function Plot", width=500)
