@@ -1,19 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import io
-
-try:
-    import cv2
-    HAS_CV2 = True
-except ImportError:
-    HAS_CV2 = False
-
 from PIL import Image
 
 def plot_equation_graph(expression: str):
     """
     Plots mathematical functions (e.g., y = x^2, sin(x), 2x+5) using Matplotlib and NumPy.
-    Returns RGB image array.
+    Returns PIL Image object ready for Streamlit rendering.
     """
     fig, ax = plt.subplots(figsize=(6, 4), dpi=100)
     x = np.linspace(-10, 10, 400)
@@ -46,9 +39,4 @@ def plot_equation_graph(expression: str):
     plt.close(fig)
     buf.seek(0)
 
-    pil_img = Image.open(buf).convert('RGB')
-    np_img = np.array(pil_img)
-
-    if HAS_CV2:
-        return cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
-    return np_img
+    return Image.open(buf)
