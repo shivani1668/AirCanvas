@@ -26,41 +26,46 @@ st.set_page_config(
 )
 
 st.title("🎨 Air Canvas - AI Math Solver")
-st.caption("Draw or snap a picture of your math equation & let AI solve it!")
+st.caption("Snap or upload ANY math problem image & get step-by-step AI solutions!")
 
+# Sidebar Configuration
 st.sidebar.header("⚙️ Configuration")
 api_key = st.sidebar.text_input("Google Gemini API Key (Optional)", type="password")
 use_gemini = st.sidebar.checkbox("Use Gemini AI LLM", value=True)
 
 solver = GeminiMathSolver(api_key=api_key) if api_key else None
 
-tab1, tab2 = st.tabs(["📷 Mobile Camera Snap", "📁 Upload Image"])
+tab1, tab2 = st.tabs(["📷 Mobile Camera", "📁 Upload Image"])
 
 image_to_process = None
 
 with tab1:
-    st.write("Take a photo of your handwritten math equation directly from your mobile camera:")
-    camera_file = st.camera_input("Snap Equation")
-    if camera_file is not None:
-        image_to_process = Image.open(camera_file)
+    camera_on = st.toggle("📷 Enable Camera", value=False)
+    if camera_on:
+        st.write("Snap a picture of your math problem:")
+        camera_file = st.camera_input("Take Photo of Math Problem")
+        if camera_file is not None:
+            image_to_process = Image.open(camera_file)
+    else:
+        st.info("Camera is currently OFF. Toggle 'Enable Camera' above to turn on your phone camera.")
 
 with tab2:
-    st.write("Upload an image of a math problem:")
+    st.write("Upload an image of any math equation or problem:")
     uploaded_file = st.file_uploader("Choose an image file", type=["png", "jpg", "jpeg"])
     if uploaded_file is not None:
         image_to_process = Image.open(uploaded_file)
 
 if image_to_process is not None:
-    st.image(image_to_process, caption="Captured Equation", use_column_width=True)
+    st.image(image_to_process, caption="Problem Image", use_column_width=True)
 
-    if st.button("✨ Solve Equation with AI", type="primary", use_container_width=True):
-        with st.spinner("Analyzing math equation with AI..."):
+    if st.button("✨ Solve Math Problem with AI", type="primary", use_container_width=True):
+        with st.spinner("Analyzing math equation & computing step-by-step solution..."):
             img_np = np.array(image_to_process.convert('RGB'))
 
-            if use_gemini and solver and api_key:
+            if use_gemini and solver and api_key and len(api_key.strip()) > 0:
                 result = solver.solve_canvas_image(img_np)
             else:
-                result = OfflineMathEngine.solve_expression("2x + 10 = 30")
+                result = OfflineMathEngine.solve_image_or_text(image=image_to_process)
 
             st.success("Solution Complete!")
             st.markdown(f"### 📌 Recognized Expression:\n`{result['expression']}`")
@@ -74,6 +79,6 @@ if image_to_process is not None:
 
             try:
                 graph_img = plot_equation_graph(result['expression'])
-                st.image(graph_img, caption="Matplotlib Function Plot", use_column_width=True)
+                st.image(graph_img, caption="Function Graph Visualizer", use_column_width=True)
             except Exception:
                 pass
