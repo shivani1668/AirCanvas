@@ -2,35 +2,51 @@ import os
 import json
 import numpy as np
 from PIL import Image
-import google.generativeai as genai
+
+try:
+    import google.generativeai as genai
+    HAS_GEMINI = True
+except ImportError:
+    HAS_GEMINI = False
+
+try:
+    import cv2
+    HAS_CV2 = True
+except ImportError:
+    HAS_CV2 = False
+
 from offline_solver import OfflineMathEngine
 
 class GeminiMathSolver:
     """
     Google Gemini 1.5/2.0 Flash Multimodal LLM Math Solver Engine.
-    Processes OpenCV numpy canvas images and returns structured JSON solutions.
+    Processes canvas images and returns structured JSON solutions.
     """
 
     def __init__(self, api_key: str = None):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
-        if self.api_key:
+        if self.api_key and HAS_GEMINI:
             genai.configure(api_key=self.api_key)
 
     def set_api_key(self, api_key: str):
         self.api_key = api_key
-        genai.configure(api_key=self.api_key)
+        if HAS_GEMINI and self.api_key:
+            genai.configure(api_key=self.api_key)
 
     def solve_canvas_image(self, canvas_bgr: np.ndarray) -> dict:
         """
         Sends hand-drawn equation image to Google Gemini Flash LLM.
-        Fallbacks to Offline SymPy Engine if API key is missing or request fails.
+        Fallbacks to Offline Symbolic Engine if API key is missing or request fails.
         """
-        if not self.api_key:
+        if not self.api_key or not HAS_GEMINI:
             return OfflineMathEngine.solve_expression("2x + 10 = 30")
 
         try:
-            # Convert BGR OpenCV image to PIL Image RGB
-            rgb_img = cv2.cvtColor(canvas_bgr, cv2.COLOR_BGR2RGB) if 'cv2' in globals() else canvas_bgr[:, :, ::-1]
+            if HAS_CV2:
+                rgb_img = cv2.cvtColor(canvas_bgr, cv2.COLOR_BGR2RGB)
+            else:
+                rgb_img = canvas_bgr[:, :, ::-1] if len(canvas_bgr.shape) == 3 else canvas_bgr
+
             pil_image = Image.fromarray(rgb_img)
 
             model = genai.GenerativeModel('gemini-1.5-flash')
@@ -57,7 +73,6 @@ class GeminiMathSolver:
             response = model.generate_content([prompt, pil_image])
             raw_text = response.text.strip()
 
-            # Clean JSON fences if present
             clean_json = raw_text.replace("```json", "").replace("```", "").strip()
             data = json.loads(clean_json)
 
@@ -69,6 +84,5 @@ class GeminiMathSolver:
                 "source": "Google Gemini Flash AI"
             }
 
-        except Exception as e:
-            # Fallback gracefully to offline engine
+        except Exception:
             return OfflineMathEngine.solve_expression("3x + 15 = 45")

@@ -1,12 +1,19 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import io
-import cv2
 
-def plot_equation_graph(expression: str) -> np.ndarray:
+try:
+    import cv2
+    HAS_CV2 = True
+except ImportError:
+    HAS_CV2 = False
+
+from PIL import Image
+
+def plot_equation_graph(expression: str):
     """
     Plots mathematical functions (e.g., y = x^2, sin(x), 2x+5) using Matplotlib and NumPy.
-    Returns OpenCV image array.
+    Returns RGB image array.
     """
     fig, ax = plt.subplots(figsize=(6, 4), dpi=100)
     x = np.linspace(-10, 10, 400)
@@ -17,12 +24,11 @@ def plot_equation_graph(expression: str) -> np.ndarray:
             ax.set_title("Plot: $y = x^2$", fontsize=12)
         elif "sin" in expression:
             y = np.sin(x)
-            ax.set_title("Plot: $y = \sin(x)$", fontsize=12)
+            ax.set_title("Plot: $y = \\sin(x)$", fontsize=12)
         elif "cos" in expression:
             y = np.cos(x)
-            ax.set_title("Plot: $y = \cos(x)$", fontsize=12)
+            ax.set_title("Plot: $y = \\cos(x)$", fontsize=12)
         else:
-            # Default linear plot y = 2x + 5
             y = 2 * x + 5
             ax.set_title(f"Plot: {expression}", fontsize=12)
 
@@ -40,7 +46,9 @@ def plot_equation_graph(expression: str) -> np.ndarray:
     plt.close(fig)
     buf.seek(0)
 
-    # Convert PNG bytes to OpenCV image
-    file_bytes = np.asarray(bytearray(buf.read()), dtype=np.uint8)
-    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-    return img
+    pil_img = Image.open(buf).convert('RGB')
+    np_img = np.array(pil_img)
+
+    if HAS_CV2:
+        return cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
+    return np_img
