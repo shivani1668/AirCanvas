@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import numpy as np
 from PIL import Image, ImageEnhance
 
@@ -20,6 +21,8 @@ try:
     HAS_CV2 = True
 except ImportError:
     HAS_CV2 = False
+
+from src.offline_solver import OfflineMathEngine
 
 def get_secret_key() -> str:
     key = ""
@@ -42,10 +45,47 @@ def enhance_math_image(pil_img: Image.Image) -> Image.Image:
     except Exception:
         return pil_img
 
+def clean_latex_to_plain_math(text: str) -> str:
+    """
+    Converts raw LaTeX formatting like \\frac{A}{B} and \\sqrt{X} into clean, readable plain math:
+    Fractions use slash '/' and square roots use root symbol '√'.
+    """
+    if not text:
+        return text
+
+    cleaned = str(text)
+
+    # Convert \frac{num}{den} -> (num) / (den)
+    # Apply repeatedly for nested fractions
+    for _ in range(3):
+        cleaned = re.sub(r"\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}", r"(\1) / (\2)", cleaned)
+
+    # Convert \sqrt{x} -> √(x)
+    cleaned = re.sub(r"\\sqrt\s*\{([^{}]+)\}", r"√(\1)", cleaned)
+    cleaned = re.sub(r"\\sqrt", "√", cleaned)
+
+    # Replace common LaTeX operators with clean symbols
+    cleaned = (
+        cleaned.replace(r"\times", "×")
+        .replace(r"\div", "÷")
+        .replace(r"\cdot", "*")
+        .replace(r"\pm", "±")
+        .replace(r"\infty", "∞")
+        .replace(r"\pi", "π")
+        .replace(r"\theta", "θ")
+        .replace(r"\alpha", "α")
+        .replace(r"\beta", "β")
+        .replace(r"\int", "∫")
+        .replace("{", "")
+        .replace("}", "")
+    )
+
+    return cleaned
+
 class GeminiMathSolver:
     """
     Direct Google Gemini Multimodal Vision AI Model Engine.
-    Analyzes uploaded/snapped images directly using Gemini Flash Vision Models.
+    Outputs clean readable math notation with slash '/' for fractions and '√' for root symbols.
     Primary Endpoint: gemini-3.8-flash
     """
 
@@ -69,7 +109,7 @@ class GeminiMathSolver:
     def solve_canvas_image(self, canvas_bgr: np.ndarray, pil_image: Image.Image = None) -> dict:
         """
         Directly sends the uploaded image to Google Gemini Flash AI Vision Model for live analysis.
-        Primary Model: models/gemini-3.8-flash
+        Converts all LaTeX code into clean readable plain math notation.
         """
         if not self.api_key:
             self.api_key = get_secret_key()
@@ -106,26 +146,26 @@ class GeminiMathSolver:
         You are a World-Class AI Mathematics Professor and Multimodal Vision Model.
         Examine this uploaded image directly. Perform live OCR and mathematical analysis.
 
-        INSTRUCTIONS:
-        1. Transcribe the mathematical problem, equation, handwritten text, or multiple-choice question (MCQ) directly from this image.
-        2. Analyze the structure and mathematical principles required to solve it.
-        3. Show a complete, rigorous, step-by-step mathematical proof and solution.
-        4. Provide the final simplified answer (and if it's an MCQ, state the exact Option letter like 'Option B').
+        FORMATTING RULES:
+        1. DO NOT use raw LaTeX commands like \\frac{}{} or \\sqrt{}.
+        2. Use slash '/' for fractions (e.g. '2√3 / 3' instead of '\\frac{2\\sqrt{3}}{3}').
+        3. Use root symbol '√' for square roots (e.g. '√3' instead of '\\sqrt{3}').
+        4. Show a complete, rigorous, step-by-step mathematical proof and solution.
+        5. Provide the final simplified answer (and if it's an MCQ, state the exact Option letter like 'Option B').
 
         Output strictly in VALID JSON format (no markdown blocks, pure JSON):
         {
-          "expression": "<Transcribed Problem From Image>",
+          "expression": "<Transcribed Problem From Image in clean math notation>",
           "category": "<Mathematical Category>",
           "steps": [
             "Step 1: ...",
             "Step 2: ...",
             "Step 3: ..."
           ],
-          "final_answer": "<Final Answer>"
+          "final_answer": "<Final Answer in clean math notation>"
         }
         """
 
-        # Gemini Flash Models (gemini-3.8-flash as primary endpoint)
         models_to_try = [
             'gemini-3.8-flash',
             'models/gemini-3.8-flash',
@@ -147,11 +187,20 @@ class GeminiMathSolver:
                 clean_json = raw_text.replace("```json", "").replace("```", "").strip()
                 data = json.loads(clean_json)
 
+                raw_expr = data.get("expression", "Analyzed Image Problem")
+                raw_steps = data.get("steps", ["Parsed directly by Gemini AI"])
+                raw_ans = data.get("final_answer", "Solved")
+
+                # Convert any remaining LaTeX code to clean plain math notation
+                clean_expr = clean_latex_to_plain_math(raw_expr)
+                clean_steps = [clean_latex_to_plain_math(s) for s in raw_steps]
+                clean_ans = clean_latex_to_plain_math(raw_ans)
+
                 return {
-                    "expression": data.get("expression", "Analyzed Image Problem"),
+                    "expression": clean_expr,
                     "category": data.get("category", "Mathematics"),
-                    "steps": data.get("steps", ["Parsed directly by Gemini AI"]),
-                    "final_answer": data.get("final_answer", "Solved"),
+                    "steps": clean_steps,
+                    "final_answer": clean_ans,
                     "source": f"Google Gemini ({model_name})"
                 }
             except Exception as e:
