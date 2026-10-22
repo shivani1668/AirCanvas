@@ -25,17 +25,11 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom Times New Roman + Math Symbol Typography Styling
+# Custom Styling: Global UI stays in standard Sans-Serif font, while Math Calculation cards use Times New Roman + Symbol font with double arrow ⇒
 st.markdown("""
 <style>
-    /* Times New Roman + Symbol Font for Mathematical Typography */
-    html, body, [class*="css"], .stMarkdown, p, div, span, code, pre, h1, h2, h3, h4 {
-        font-family: 'Times New Roman', 'Times', 'Cambria Math', 'STIX Two Math', 'Symbol', serif !important;
-    }
-
     .step-explanation {
-        font-family: 'Times New Roman', 'Times', 'Symbol', serif !important;
-        font-size: 1.15rem !important;
+        font-size: 1.05rem !important;
         font-weight: 600 !important;
         color: #f5e0dc !important;
         margin-top: 10px !important;
@@ -43,7 +37,7 @@ st.markdown("""
 
     .math-card {
         font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important;
-        font-size: 1.4rem !important;
+        font-size: 1.35rem !important;
         font-weight: bold !important;
         background-color: #181825 !important;
         color: #a6e3a1 !important;
@@ -58,7 +52,7 @@ st.markdown("""
 
     .final-answer-box {
         font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important;
-        font-size: 1.6rem !important;
+        font-size: 1.55rem !important;
         font-weight: bold !important;
         background-color: #1e1e2e !important;
         color: #89b4fa !important;
@@ -116,8 +110,8 @@ with tab2:
 
 def render_step_with_larger_math(step_text: str):
     """
-    Renders step explanation in regular Times New Roman, and places the math calculation
-    right below it on a new line in a larger, bold Times New Roman + Symbol font card.
+    Renders step explanation in regular font, and places the math calculation
+    right below it on a new line in a larger, bold Times New Roman + Symbol font card with double arrow ⇒.
     """
     step_str = str(step_text).strip()
     if ":" in step_str:
@@ -126,7 +120,9 @@ def render_step_with_larger_math(step_text: str):
         calc = parts[1].strip()
         st.markdown(f"<div class='step-explanation'>• {explanation}:</div>", unsafe_allow_html=True)
         if calc:
-            st.markdown(f"<div class='math-card'>{calc}</div>", unsafe_allow_html=True)
+            # Prefix double arrow symbol ⇒ for math calculations
+            display_calc = calc if calc.startswith("⇒") else f"⇒ {calc}"
+            st.markdown(f"<div class='math-card'>{display_calc}</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div class='step-explanation'>• {step_str}</div>", unsafe_allow_html=True)
 

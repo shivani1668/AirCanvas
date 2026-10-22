@@ -47,8 +47,8 @@ def enhance_math_image(pil_img: Image.Image) -> Image.Image:
 
 def clean_latex_to_plain_math(text: str) -> str:
     """
-    Converts raw LaTeX formatting like \\frac{A}{B} and \\sqrt{X} into clean, readable plain math:
-    Fractions use slash '/' and square roots use root symbol '√'.
+    Converts raw LaTeX formatting into clean plain math notation.
+    Uses slash '/' for fractions, '√' for root symbols, and '⇒' for double arrow implications.
     """
     if not text:
         return text
@@ -56,7 +56,6 @@ def clean_latex_to_plain_math(text: str) -> str:
     cleaned = str(text)
 
     # Convert \frac{num}{den} -> (num) / (den)
-    # Apply repeatedly for nested fractions
     for _ in range(3):
         cleaned = re.sub(r"\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}", r"(\1) / (\2)", cleaned)
 
@@ -64,9 +63,13 @@ def clean_latex_to_plain_math(text: str) -> str:
     cleaned = re.sub(r"\\sqrt\s*\{([^{}]+)\}", r"√(\1)", cleaned)
     cleaned = re.sub(r"\\sqrt", "√", cleaned)
 
-    # Replace common LaTeX operators with clean symbols
+    # Replace common LaTeX operators with clean symbols & double arrow ⇒
     cleaned = (
-        cleaned.replace(r"\times", "×")
+        cleaned.replace(r"\implies", "⇒")
+        .replace(r"\Rightarrow", "⇒")
+        .replace("=>", "⇒")
+        .replace("->", "⇒")
+        .replace(r"\times", "×")
         .replace(r"\div", "÷")
         .replace(r"\cdot", "*")
         .replace(r"\pm", "±")
@@ -85,7 +88,7 @@ def clean_latex_to_plain_math(text: str) -> str:
 class GeminiMathSolver:
     """
     Direct Google Gemini Multimodal Vision AI Model Engine.
-    Outputs clean readable math notation with slash '/' for fractions and '√' for root symbols.
+    Outputs clean readable math notation with double arrows '⇒', slash '/', and '√'.
     Primary Endpoint: gemini-3.8-flash
     """
 
@@ -109,7 +112,6 @@ class GeminiMathSolver:
     def solve_canvas_image(self, canvas_bgr: np.ndarray, pil_image: Image.Image = None) -> dict:
         """
         Directly sends the uploaded image to Google Gemini Flash AI Vision Model for live analysis.
-        Converts all LaTeX code into clean readable plain math notation.
         """
         if not self.api_key:
             self.api_key = get_secret_key()
@@ -150,8 +152,9 @@ class GeminiMathSolver:
         1. DO NOT use raw LaTeX commands like \\frac{}{} or \\sqrt{}.
         2. Use slash '/' for fractions (e.g. '2√3 / 3' instead of '\\frac{2\\sqrt{3}}{3}').
         3. Use root symbol '√' for square roots (e.g. '√3' instead of '\\sqrt{3}').
-        4. Show a complete, rigorous, step-by-step mathematical proof and solution.
-        5. Provide the final simplified answer (and if it's an MCQ, state the exact Option letter like 'Option B').
+        4. Use double arrow symbol '⇒' for step implications (e.g. '2x = 10 ⇒ x = 5').
+        5. Show a complete, rigorous, step-by-step mathematical proof and solution.
+        6. Provide the final simplified answer (and if it's an MCQ, state the exact Option letter like 'Option B').
 
         Output strictly in VALID JSON format (no markdown blocks, pure JSON):
         {
@@ -191,7 +194,6 @@ class GeminiMathSolver:
                 raw_steps = data.get("steps", ["Parsed directly by Gemini AI"])
                 raw_ans = data.get("final_answer", "Solved")
 
-                # Convert any remaining LaTeX code to clean plain math notation
                 clean_expr = clean_latex_to_plain_math(raw_expr)
                 clean_steps = [clean_latex_to_plain_math(s) for s in raw_steps]
                 clean_ans = clean_latex_to_plain_math(raw_ans)
