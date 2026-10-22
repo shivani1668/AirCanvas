@@ -172,7 +172,7 @@ if sidebar_page == "🏠 Home":
     st.markdown("<h2 class='hero-title'>Math made simple.</h2>", unsafe_allow_html=True)
     st.markdown("<p class='hero-subtitle'>Upload, snap, or type a question. Learn at your pace.</p>", unsafe_allow_html=True)
 
-    # Central Box Displaying "Made with 💝 by Shivani"
+    # Central Header Box
     st.markdown("""
     <div class='glass-card' style='text-align: center; padding: 18px 24px; margin-bottom: 16px;'>
         <div style='font-size: 1.4rem; font-weight: 900; color: #ffffff;'>✨ Made with 💝 by Shivani</div>
@@ -180,7 +180,6 @@ if sidebar_page == "🏠 Home":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
     input_tab1, input_tab2, input_tab3 = st.tabs(["🖼️ Upload Image", "📷 Open Camera", "⌨️ Type Question"])
 
     image_to_process = None
@@ -201,7 +200,6 @@ if sidebar_page == "🏠 Home":
     with input_tab3:
         st.write("Type or paste your math question / equation:")
 
-        # Math Symbol Keyboard Buttons
         st.markdown("**Math Symbol Keyboard (Click symbol to insert):**")
         sym_col1, sym_col2, sym_col3, sym_col4, sym_col5, sym_col6 = st.columns(6)
 
@@ -216,15 +214,15 @@ if sidebar_page == "🏠 Home":
             if st.button("/ (Fraction)"): append_symbol("/")
         with sym_col3:
             if st.button("d/dx (Diff)"): append_symbol("d/dx(")
-            if st.button("∫ (Integral)"): append_symbol("∫")
+            if st.button("∫ (Integral)"): append_symbol("∫ ")
         with sym_col4:
+            if st.button("∫_a^b (Definite)"): append_symbol("∫_a^b ")
+            if st.button("dx (Differential)"): append_symbol("dx")
+        with sym_col5:
             if st.button("π (Pi)"): append_symbol("π")
             if st.button("θ (Theta)"): append_symbol("θ")
-        with sym_col5:
-            if st.button("∞ (Infinity)"): append_symbol("∞")
-            if st.button("≤ (Less Equal)"): append_symbol("≤")
         with sym_col6:
-            if st.button("≥ (Greater Equal)"): append_symbol("≥")
+            if st.button("∞ (Infinity)"): append_symbol("∞")
             if st.button("≠ (Not Equal)"): append_symbol("≠")
 
         typed_val = st.text_area("Question Text Area", value=st.session_state.get("typed_question", ""), height=100)
@@ -232,8 +230,6 @@ if sidebar_page == "🏠 Home":
 
         if st.button("✨ SOLVE TYPED QUESTION WITH AI", type="primary", use_container_width=True):
             text_question_to_process = typed_val
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
     # Process Image or Typed Question
     if image_to_process is not None or text_question_to_process is not None:
