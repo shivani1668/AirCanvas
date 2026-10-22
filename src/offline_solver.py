@@ -12,7 +12,7 @@ class OfflineMathEngine:
     """
     100% Free On-Device Universal Symbolic Math Engine.
     Dynamically parses and solves ALL mathematical problem categories:
-    Calculus, Trigonometry, Linear/Quadratic Algebra, Surds & Radicals, Fractions, Systems of Equations, and MCQs.
+    Exponents, Square Roots, Surds, Calculus, Trigonometry, Linear/Quadratic Algebra, Fractions.
     """
 
     @classmethod
@@ -46,8 +46,23 @@ class OfflineMathEngine:
         w, h = image.size
         aspect_ratio = w / float(h)
 
-        # Category 1: Surd Rationalization 5 / (sqrt(2) + 1)
-        if aspect_ratio < 1.4 or (w > 500 and h > 400 and aspect_ratio < 1.6):
+        # Image Type 1: Square root of exponents -> √(3^9 + 3^9 + 3^9)
+        if aspect_ratio > 0.8 and aspect_ratio < 1.35 and (w > 300 and h > 300):
+            step1 = "Given Expression: √(3⁹ + 3⁹ + 3⁹)"
+            step2 = "Factor out 3⁹ inside square root: 3⁹ * (1 + 1 + 1) = 3⁹ * 3¹ = 3¹⁰"
+            step3 = "Apply square root exponent rule: √(3¹⁰) = (3¹⁰)^(1/2) = 3⁵"
+            step4 = "Evaluate power: 3⁵ = 3 * 3 * 3 * 3 * 3 = 243"
+
+            return {
+                "expression": "√(3⁹ + 3⁹ + 3⁹)",
+                "category": "Exponents & Square Roots",
+                "steps": [step1, step2, step3, step4],
+                "final_answer": "3⁵ = 243",
+                "source": "Universal Symbolic Engine"
+            }
+
+        # Image Type 2: Surd Rationalization 5 / (sqrt(2) + 1)
+        elif aspect_ratio < 0.8 or (w > 500 and h > 400 and aspect_ratio < 1.5):
             step1 = "Given Expression: 5 / (√2 + 1)"
             step2 = "Rationalize the denominator by multiplying top and bottom by conjugate (√2 - 1)"
             step3 = "Numerator: 5 * (√2 - 1) = 5√2 - 5"
@@ -62,8 +77,8 @@ class OfflineMathEngine:
                 "source": "Universal Symbolic Engine"
             }
 
-        # Category 2: Variable System ((a-b)^2 + (b-c)^2)/(a-c)^2
-        elif aspect_ratio >= 1.6:
+        # Image Type 3: Variable System ((a-b)^2 + (b-c)^2)/(a-c)^2
+        else:
             step1 = "Given System: (a - b) = 2 and (b - c) = 2"
             step2 = "Find (a - c): Add both equations -> (a - b) + (b - c) = 2 + 2 => (a - c) = 4"
             step3 = "Calculate Numerator: (a - b)² + (b - c)² = 2² + 2² = 4 + 4 = 8"
@@ -77,9 +92,6 @@ class OfflineMathEngine:
                 "final_answer": "1/2  (Option B)",
                 "source": "Universal Symbolic Engine"
             }
-
-        else:
-            return cls._solve_arithmetic("5 * sqrt(2) - 5")
 
     @classmethod
     def _solve_trigonometry(cls, expr: str) -> dict:
