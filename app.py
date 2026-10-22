@@ -40,6 +40,11 @@ try:
 except Exception:
     pass
 
+# Dark / Light Mode Switch Toggle
+theme_toggle = st.sidebar.toggle("🌙 Dark Mode / ☀️ Light Mode", value=(st.session_state["theme_mode"] == "Dark"))
+st.session_state["theme_mode"] = "Dark" if theme_toggle else "Light"
+is_dark = (st.session_state["theme_mode"] == "Dark")
+
 # LEFT SIDEBAR DESIGN
 st.sidebar.markdown("""
 <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 16px;'>
@@ -50,11 +55,6 @@ st.sidebar.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-# Dark / Light Mode Switch Toggle
-theme_toggle = st.sidebar.toggle("🌙 Dark Mode / ☀️ Light Mode", value=(st.session_state["theme_mode"] == "Dark"))
-st.session_state["theme_mode"] = "Dark" if theme_toggle else "Light"
-is_dark = (st.session_state["theme_mode"] == "Dark")
 
 # Simplified 2-Option Sidebar Navigation
 sidebar_page = st.sidebar.radio(
@@ -89,12 +89,20 @@ show_graph_manual = st.sidebar.checkbox("📊 Show Function Graph", value=False)
 
 solver = GeminiMathSolver(api_key=user_api_key if user_api_key else None)
 
-# Dynamic CSS Theme Injection (Dark vs Light Mode)
+# Dynamic CSS Theme Injection (Both Sidebar & Homepage Switch)
 if is_dark:
     st.markdown("""
     <style>
         .stApp, [data-testid="stAppViewContainer"] {
             background-color: #000000 !important;
+            color: #ffffff !important;
+        }
+        section[data-testid="stSidebar"], [data-testid="stSidebar"] > div {
+            background-color: #0c0d1a !important;
+            color: #ffffff !important;
+            border-right: 1px solid #1e2040 !important;
+        }
+        [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
             color: #ffffff !important;
         }
         .hero-main-title { color: #ffffff !important; text-align: center !important; font-size: 3.8rem !important; font-weight: 900 !important; }
@@ -108,11 +116,19 @@ if is_dark:
     </style>
     """, unsafe_allow_html=True)
 else:
-    # Light Mode Theme Styling
+    # Light Mode Theme Styling (Sidebar + Homepage Both Light)
     st.markdown("""
     <style>
         .stApp, [data-testid="stAppViewContainer"] {
             background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        section[data-testid="stSidebar"], [data-testid="stSidebar"] > div {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-right: 1px solid #cbd5e1 !important;
+        }
+        [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
             color: #0f172a !important;
         }
         .hero-main-title { color: #1e1b4b !important; text-align: center !important; font-size: 3.8rem !important; font-weight: 900 !important; }
