@@ -4,6 +4,12 @@ import numpy as np
 from PIL import Image
 
 try:
+    import streamlit as st
+    HAS_STREAMLIT = True
+except ImportError:
+    HAS_STREAMLIT = False
+
+try:
     import google.generativeai as genai
     HAS_GEMINI = True
 except ImportError:
@@ -17,8 +23,16 @@ except ImportError:
 
 from src.offline_solver import OfflineMathEngine
 
-# Default Public Key Fallback placeholder / Env Key
-DEFAULT_GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
+def get_secret_key() -> str:
+    # 1. Check Streamlit secrets
+    if HAS_STREAMLIT:
+        try:
+            if "GEMINI_API_KEY" in st.secrets:
+                return st.secrets["GEMINI_API_KEY"]
+        except Exception:
+            pass
+    # 2. Check Environment variables
+    return os.getenv("GEMINI_API_KEY", "")
 
 class GeminiMathSolver:
     """
@@ -27,7 +41,7 @@ class GeminiMathSolver:
     """
 
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or DEFAULT_GEMINI_KEY
+        self.api_key = api_key or get_secret_key()
         if self.api_key and HAS_GEMINI:
             try:
                 genai.configure(api_key=self.api_key)
@@ -48,6 +62,15 @@ class GeminiMathSolver:
         Sends hand-drawn or photographed equation image to Google Gemini Flash LLM.
         Fallbacks to Offline Symbolic Engine if API key is missing or request fails.
         """
+        # Always re-check secret key if not set
+        if not self.api_key:
+            self.api_key = get_secret_key()
+            if self.api_key and HAS_GEMINI:
+                try:
+                    genai.configure(api_key=self.api_key)
+                except Exception:
+                    pass
+
         if not HAS_GEMINI or not self.api_key:
             return OfflineMathEngine.solve_image_or_text(image=pil_image)
 
