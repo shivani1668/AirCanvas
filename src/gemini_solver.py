@@ -46,24 +46,17 @@ def enhance_math_image(pil_img: Image.Image) -> Image.Image:
         return pil_img
 
 def clean_latex_to_plain_math(text: str) -> str:
-    """
-    Converts raw LaTeX formatting into clean plain math notation.
-    Uses slash '/' for fractions, '√' for root symbols, and '⇒' for double arrow implications.
-    """
     if not text:
         return text
 
     cleaned = str(text)
 
-    # Convert \frac{num}{den} -> (num) / (den)
     for _ in range(3):
         cleaned = re.sub(r"\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}", r"(\1) / (\2)", cleaned)
 
-    # Convert \sqrt{x} -> √(x)
     cleaned = re.sub(r"\\sqrt\s*\{([^{}]+)\}", r"√(\1)", cleaned)
     cleaned = re.sub(r"\\sqrt", "√", cleaned)
 
-    # Replace common LaTeX operators with clean symbols & double arrow ⇒
     cleaned = (
         cleaned.replace(r"\implies", "⇒")
         .replace(r"\Rightarrow", "⇒")
@@ -87,8 +80,7 @@ def clean_latex_to_plain_math(text: str) -> str:
 
 class GeminiMathSolver:
     """
-    Direct Google Gemini Multimodal Vision AI Model Engine.
-    Outputs clean readable math notation with double arrows '⇒', slash '/', and '√'.
+    Direct Google Gemini Multimodal Vision & Text AI Model Engine.
     Primary Endpoint: gemini-3.8-flash
     """
 
@@ -108,6 +100,82 @@ class GeminiMathSolver:
                     genai.configure(api_key=self.api_key)
                 except Exception:
                     pass
+
+    def solve_text_question(self, question_text: str) -> dict:
+        """
+        Sends typed mathematical text directly to Google Gemini Flash LLM for live reasoning and step-by-step resolution.
+        """
+        if not self.api_key:
+            self.api_key = get_secret_key()
+
+        if self.api_key and HAS_GEMINI:
+            try:
+                genai.configure(api_key=self.api_key)
+            except Exception:
+                pass
+
+        if not HAS_GEMINI or not self.api_key:
+            return OfflineMathEngine.solve_image_or_text(raw_text=question_text)
+
+        prompt = f"""
+        You are a World-Class AI Mathematics Professor. Solve this mathematical question/equation step-by-step:
+
+        QUESTION:
+        {question_text}
+
+        INSTRUCTIONS:
+        1. Transcribe the mathematical problem in clean readable notation (use '∫' for integrals, 'd/dx' for derivatives, '/' for fractions, '√' for square roots).
+        2. Perform rigorous step-by-step mathematical calculation / integration / differentiation / algebra.
+        3. Provide the final simplified answer clearly.
+
+        Output strictly in VALID JSON format (no markdown blocks, pure JSON):
+        {{
+          "expression": "{question_text}",
+          "category": "Calculus / Algebra / Trigonometry / Arithmetic",
+          "steps": [
+            "Step 1: ...",
+            "Step 2: ...",
+            "Step 3: ..."
+          ],
+          "final_answer": "Final Answer"
+        }}
+        """
+
+        models_to_try = [
+            'gemini-3.8-flash',
+            'models/gemini-3.8-flash',
+            'gemini-2.5-flash',
+            'models/gemini-2.5-flash',
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-latest',
+            'gemini-2.0-flash-exp',
+            'gemini-2.0-flash'
+        ]
+
+        for model_name in models_to_try:
+            try:
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(prompt)
+                raw_text = response.text.strip()
+
+                clean_json = raw_text.replace("```json", "").replace("```", "").strip()
+                data = json.loads(clean_json)
+
+                raw_expr = data.get("expression", question_text)
+                raw_steps = data.get("steps", ["Solved by Gemini AI"])
+                raw_ans = data.get("final_answer", "Solved")
+
+                return {
+                    "expression": clean_latex_to_plain_math(raw_expr),
+                    "category": data.get("category", "Mathematics"),
+                    "steps": [clean_latex_to_plain_math(s) for s in raw_steps],
+                    "final_answer": clean_latex_to_plain_math(raw_ans),
+                    "source": f"Google Gemini ({model_name})"
+                }
+            except Exception:
+                pass
+
+        return OfflineMathEngine.solve_image_or_text(raw_text=question_text)
 
     def solve_canvas_image(self, canvas_bgr: np.ndarray, pil_image: Image.Image = None) -> dict:
         """

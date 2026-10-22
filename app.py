@@ -33,7 +33,7 @@ if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "Dark"
 
 if "typed_question" not in st.session_state:
-    st.session_state["typed_question"] = "2x + 10 = 30"
+    st.session_state["typed_question"] = "∫ cos(2x) dx"
 
 # Secrets Check
 has_secrets_key = False
@@ -172,7 +172,6 @@ if sidebar_page == "🏠 Home":
     st.markdown("<h2 class='hero-title'>Math made simple.</h2>", unsafe_allow_html=True)
     st.markdown("<p class='hero-subtitle'>Upload, snap, or type a question. Learn at your pace.</p>", unsafe_allow_html=True)
 
-    # Central Header Box
     st.markdown("""
     <div class='glass-card' style='text-align: center; padding: 18px 24px; margin-bottom: 16px;'>
         <div style='font-size: 1.4rem; font-weight: 900; color: #ffffff;'>✨ Made with 💝 by Shivani</div>
@@ -245,7 +244,7 @@ if sidebar_page == "🏠 Home":
         if solve_trigger:
             with st.spinner("Analyzing math problem & generating step-by-step AI solution..."):
                 if text_question_to_process is not None:
-                    result = OfflineMathEngine.solve_expression(text_question_to_process)
+                    result = solver.solve_text_question(text_question_to_process)
                 else:
                     img_np = np.array(image_to_process.convert('RGB'))
                     result = solver.solve_canvas_image(img_np, pil_image=image_to_process)
