@@ -32,6 +32,9 @@ if "history" not in st.session_state:
 if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "Dark"
 
+if "typed_question" not in st.session_state:
+    st.session_state["typed_question"] = "2x + 10 = 30"
+
 # Secrets Check
 has_secrets_key = False
 try:
@@ -167,20 +170,21 @@ if sidebar_page == "🏠 Home":
 
     st.markdown("<div style='text-align: center;'><span style='background-color: #1976d2; color: #ffffff; padding: 6px 16px; border-radius: 2px; font-size: 0.85rem; font-weight: 800;'>✨ AI-POWERED LEARNING</span></div>", unsafe_allow_html=True)
     st.markdown("<h2 class='hero-title'>Math made simple.</h2>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Upload a question. Understand every step. Learn at your pace.</p>", unsafe_allow_html=True)
+    st.markdown("<p class='hero-subtitle'>Upload, snap, or type a question. Learn at your pace.</p>", unsafe_allow_html=True)
 
     # Central Box Displaying "Made with 💝 by Shivani"
     st.markdown("""
     <div class='glass-card' style='text-align: center; padding: 18px 24px; margin-bottom: 16px;'>
         <div style='font-size: 1.4rem; font-weight: 900; color: #ffffff;'>✨ Made with 💝 by Shivani</div>
-        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload a photo of your math problem or snap with camera</div>
+        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload image, snap with camera, or type equation with math symbol keyboard</div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
-    input_tab1, input_tab2 = st.tabs(["🖼️ Upload Image", "📷 Open Camera"])
+    input_tab1, input_tab2, input_tab3 = st.tabs(["🖼️ Upload Image", "📷 Open Camera", "⌨️ Type Question"])
 
     image_to_process = None
+    text_question_to_process = None
 
     with input_tab1:
         uploaded_file = st.file_uploader("Choose math image file", type=["png", "jpg", "jpeg"], label_visibility="collapsed")
@@ -194,15 +198,61 @@ if sidebar_page == "🏠 Home":
             if camera_file is not None:
                 image_to_process = Image.open(camera_file)
 
+    with input_tab3:
+        st.write("Type or paste your math question / equation:")
+
+        # Math Symbol Keyboard Buttons
+        st.markdown("**Math Symbol Keyboard (Click symbol to insert):**")
+        sym_col1, sym_col2, sym_col3, sym_col4, sym_col5, sym_col6 = st.columns(6)
+
+        def append_symbol(sym):
+            st.session_state["typed_question"] = st.session_state.get("typed_question", "") + " " + sym
+
+        with sym_col1:
+            if st.button("√ (Root)"): append_symbol("√")
+            if st.button("x² (Power)"): append_symbol("^2")
+        with sym_col2:
+            if st.button("± (Plus-Minus)"): append_symbol("±")
+            if st.button("/ (Fraction)"): append_symbol("/")
+        with sym_col3:
+            if st.button("d/dx (Diff)"): append_symbol("d/dx(")
+            if st.button("∫ (Integral)"): append_symbol("∫")
+        with sym_col4:
+            if st.button("π (Pi)"): append_symbol("π")
+            if st.button("θ (Theta)"): append_symbol("θ")
+        with sym_col5:
+            if st.button("∞ (Infinity)"): append_symbol("∞")
+            if st.button("≤ (Less Equal)"): append_symbol("≤")
+        with sym_col6:
+            if st.button("≥ (Greater Equal)"): append_symbol("≥")
+            if st.button("≠ (Not Equal)"): append_symbol("≠")
+
+        typed_val = st.text_area("Question Text Area", value=st.session_state.get("typed_question", ""), height=100)
+        st.session_state["typed_question"] = typed_val
+
+        if st.button("✨ SOLVE TYPED QUESTION WITH AI", type="primary", use_container_width=True):
+            text_question_to_process = typed_val
+
     st.markdown("</div>", unsafe_allow_html=True)
 
-    if image_to_process is not None:
-        st.image(image_to_process, caption="Math Question Image", use_column_width=True)
+    # Process Image or Typed Question
+    if image_to_process is not None or text_question_to_process is not None:
+        if image_to_process is not None:
+            st.image(image_to_process, caption="Math Question Image", use_column_width=True)
 
-        if st.button("✨ SOLVE MATH PROBLEM WITH GEMINI AI", type="primary", use_container_width=True):
+        solve_trigger = False
+        if text_question_to_process is not None:
+            solve_trigger = True
+        else:
+            solve_trigger = st.button("✨ SOLVE MATH PROBLEM WITH GEMINI AI", type="primary", use_container_width=True)
+
+        if solve_trigger:
             with st.spinner("Analyzing math problem & generating step-by-step AI solution..."):
-                img_np = np.array(image_to_process.convert('RGB'))
-                result = solver.solve_canvas_image(img_np, pil_image=image_to_process)
+                if text_question_to_process is not None:
+                    result = OfflineMathEngine.solve_expression(text_question_to_process)
+                else:
+                    img_np = np.array(image_to_process.convert('RGB'))
+                    result = solver.solve_canvas_image(img_np, pil_image=image_to_process)
 
                 st.session_state["history"].append(result)
 
