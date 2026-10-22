@@ -123,8 +123,9 @@ class GeminiMathSolver:
         }
         """
 
-        # Gemini Flash Models
+        # Gemini Flash Models (gemini-2.5-flash primary)
         models_to_try = [
+            'gemini-2.5-flash',
             'gemini-1.5-flash',
             'gemini-1.5-flash-latest',
             'gemini-2.0-flash-exp',
