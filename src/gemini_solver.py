@@ -21,8 +21,6 @@ try:
 except ImportError:
     HAS_CV2 = False
 
-from src.offline_solver import OfflineMathEngine
-
 def get_secret_key() -> str:
     key = ""
     if HAS_STREAMLIT:
@@ -39,15 +37,15 @@ def enhance_math_image(pil_img: Image.Image) -> Image.Image:
     try:
         img = pil_img.convert('RGB')
         enhancer = ImageEnhance.Contrast(img)
-        img = enhancer.enhance(1.5)
+        img = enhancer.enhance(1.4)
         return img
     except Exception:
         return pil_img
 
 class GeminiMathSolver:
     """
-    Google Gemini 1.5/2.0 Flash Multimodal LLM Math Solver Engine.
-    High-Precision Vision Prompting & Double-Checked Verification.
+    Direct Google Gemini Multimodal Vision AI Model Engine.
+    Analyzes uploaded/snapped images directly with ZERO pre-fed solutions.
     """
 
     def __init__(self, api_key: str = None):
@@ -69,8 +67,8 @@ class GeminiMathSolver:
 
     def solve_canvas_image(self, canvas_bgr: np.ndarray, pil_image: Image.Image = None) -> dict:
         """
-        Sends hand-drawn or photographed equation image to Google Gemini Flash LLM.
-        Applies high-precision vision prompting & step-by-step verification.
+        Directly sends the uploaded image to Google Gemini Flash AI Vision Model for live analysis.
+        NO pre-fed or hardcoded fallback solutions.
         """
         if not self.api_key:
             self.api_key = get_secret_key()
@@ -81,10 +79,19 @@ class GeminiMathSolver:
             except Exception:
                 pass
 
+        # If API key is missing, prompt user for API key without returning pre-fed math
         if not HAS_GEMINI or not self.api_key:
-            return OfflineMathEngine.solve_image_or_text(image=pil_image)
-
-        last_error = ""
+            return {
+                "expression": "Gemini API Key Required",
+                "category": "Authentication",
+                "steps": [
+                    "Step 1: Get a 100% Free Gemini API Key from Google AI Studio (aistudio.google.com/app/apikey)",
+                    "Step 2: Paste your API key in the left Sidebar or save it in Streamlit Cloud Secrets (GEMINI_API_KEY = \"...\")",
+                    "Step 3: Gemini Vision AI will directly analyze and solve your uploaded image live!"
+                ],
+                "final_answer": "Please enter Gemini API Key to solve live image",
+                "source": "AI Key Notice"
+            }
 
         if pil_image is None:
             if HAS_CV2:
@@ -96,30 +103,30 @@ class GeminiMathSolver:
         enhanced_image = enhance_math_image(pil_image)
 
         prompt = """
-        You are a World-Class AI Mathematics Professor and Vision Expert.
-        Examine this image containing a mathematical problem, equation, handwritten drawing, or multiple-choice question (MCQ).
+        You are a World-Class AI Mathematics Professor and Multimodal Vision Model.
+        Examine this uploaded image directly. Perform live OCR and mathematical analysis.
 
-        CRITICAL INSTRUCTIONS:
-        1. Transcribe EVERY single number, symbol, square root (√), exponent, fraction line, and variable EXACTLY as shown in the image.
-        2. Show a complete, rigorous, step-by-step mathematical proof/calculation.
-        3. Verify your final calculated result algebraically.
-        4. If multiple-choice options (A, B, C, D) are visible in the image, match your calculated answer to the exact Option letter.
+        INSTRUCTIONS:
+        1. Transcribe the mathematical problem, equation, handwritten text, or multiple-choice question (MCQ) directly from this image.
+        2. Analyze the structure and mathematical principles required to solve it.
+        3. Show a complete, rigorous, step-by-step mathematical proof and solution.
+        4. Provide the final simplified answer (and if it's an MCQ, state the exact Option letter like 'Option B').
 
-        Output strictly in VALID JSON format with NO markdown code fences or conversational intro:
+        Output strictly in VALID JSON format (no markdown blocks, pure JSON):
         {
-          "expression": "Exact Math Problem Transcribed From Image (e.g. √(3^9 + 3^9 + 3^9))",
-          "category": "Algebra / Exponents / Calculus / Surds / Geometry / MCQ",
+          "expression": "<Transcribed Problem From Image>",
+          "category": "<Mathematical Category>",
           "steps": [
-            "Step 1: Simplify inside square root -> 3^9 + 3^9 + 3^9 = 3 * 3^9 = 3^(1+9) = 3^10",
-            "Step 2: Take square root -> √(3^10) = (3^10)^(1/2) = 3^5",
-            "Step 3: Evaluate 3^5 = 243"
+            "Step 1: ...",
+            "Step 2: ...",
+            "Step 3: ..."
           ],
-          "final_answer": "3^5 = 243"
+          "final_answer": "<Final Answer>"
         }
         """
 
-        # Try multiple model endpoints in case one is restricted
         models_to_try = ['gemini-1.5-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-pro']
+        last_error = ""
 
         for model_name in models_to_try:
             try:
@@ -131,17 +138,22 @@ class GeminiMathSolver:
                 data = json.loads(clean_json)
 
                 return {
-                    "expression": data.get("expression", "Transcribed Problem"),
+                    "expression": data.get("expression", "Analyzed Image Problem"),
                     "category": data.get("category", "Mathematics"),
-                    "steps": data.get("steps", ["Parsed by Gemini AI"]),
+                    "steps": data.get("steps", ["Parsed directly by Gemini AI"]),
                     "final_answer": data.get("final_answer", "Solved"),
                     "source": f"Google Gemini ({model_name})"
                 }
             except Exception as e:
                 last_error = str(e)
 
-        # If Gemini fails, display error details and fallback
-        fallback = OfflineMathEngine.solve_image_or_text(image=pil_image)
-        if last_error:
-            fallback["source"] = f"Offline Engine (Gemini Note: {last_error[:80]})"
-        return fallback
+        return {
+            "expression": "Gemini AI Vision Analysis Error",
+            "category": "Error Notice",
+            "steps": [
+                f"Gemini AI Error: {last_error}",
+                "Please verify your Gemini API Key in Google AI Studio or try uploading a clearer image."
+            ],
+            "final_answer": "API Analysis Error",
+            "source": "Gemini AI Error"
+        }

@@ -10,38 +10,34 @@ except ImportError:
 
 class OfflineMathEngine:
     """
-    100% General Symbolic Mathematics Engine powered by SymPy.
-    Solves ANY mathematical expression, equation, or calculus problem dynamically.
-    No hardcoded cases—pure general mathematical symbolic processing.
+    100% Free On-Device Symbolic Mathematics Engine powered by SymPy.
+    Evaluates typed text math expressions and equations dynamically.
+    No hardcoded or pre-fed solutions.
     """
 
     @classmethod
     def solve_image_or_text(cls, raw_text: str = "", image: Image.Image = None) -> dict:
-        """
-        General entry point: Processes any mathematical string or image dynamically.
-        """
-        # Extract math tokens from text or image
-        extracted = cls._extract_general_math_expression(raw_text, image)
-        return cls._solve_general_expression(extracted)
+        if raw_text and len(raw_text.strip()) > 0:
+            return cls._solve_general_expression(raw_text)
+
+        return {
+            "expression": "Direct Image Analysis Required",
+            "category": "Gemini AI Vision",
+            "steps": [
+                "Step 1: To analyze handwritten or printed problem images directly, please enter a free Gemini API Key in the sidebar.",
+                "Step 2: Get a 100% Free Gemini API Key from Google AI Studio (aistudio.google.com/app/apikey).",
+                "Step 3: Google Gemini Flash Multimodal AI Model will perform live OCR and solve your uploaded image directly!"
+            ],
+            "final_answer": "Please enter Gemini API Key in Sidebar",
+            "source": "Gemini AI Setup"
+        }
 
     @classmethod
     def solve_expression(cls, raw_text: str) -> dict:
         return cls.solve_image_or_text(raw_text=raw_text)
 
     @classmethod
-    def _extract_general_math_expression(cls, text: str, image: Image.Image = None) -> str:
-        if text and len(text.strip()) > 0:
-            return text.strip()
-
-        # General image text extraction placeholder
-        return "sqrt(3**9 + 3**9 + 3**9)"
-
-    @classmethod
     def _solve_general_expression(cls, expr_str: str) -> dict:
-        """
-        General Symbolic Solver using SymPy & Python Math.
-        Handles equations (=), calculus (d/dx), trigonometry (sin/cos/tan), surds, exponents, and arithmetic.
-        """
         cleaned = (
             expr_str.strip()
             .replace("×", "*")
@@ -51,28 +47,21 @@ class OfflineMathEngine:
             .replace("√", "sqrt")
         )
 
-        # 1. General Equation Solving (LHS = RHS)
         if "=" in cleaned and not cleaned.startswith("d/dx"):
             parts = cleaned.split("=")
             if len(parts) == 2:
                 return cls._general_solve_equation(parts[0].strip(), parts[1].strip(), cleaned)
 
-        # 2. General Calculus / Differentiation
         if "d/dx" in cleaned or "diff" in cleaned:
             return cls._general_solve_calculus(cleaned)
 
-        # 3. General Trigonometry / Simplification
         if any(f in cleaned for f in ["sin", "cos", "tan", "sqrt", "**", "/"]):
             return cls._general_symbolic_simplify(cleaned)
 
-        # 4. General Arithmetic
         return cls._general_solve_arithmetic(cleaned)
 
     @classmethod
     def _general_solve_equation(cls, lhs_str: str, rhs_str: str, original_eq: str) -> dict:
-        """
-        General equation solver: Solves lhs = rhs for any variable (x, y, a, b, etc.)
-        """
         steps = [
             f"Step 1: Identify Equation: {lhs_str} = {rhs_str}",
             f"Step 2: Rearrange to standard form: ({lhs_str}) - ({rhs_str}) = 0"
@@ -80,7 +69,6 @@ class OfflineMathEngine:
 
         if HAS_SYMPY:
             try:
-                # Find all symbols in equation
                 free_symbols = list(sp.sympify(f"({lhs_str}) - ({rhs_str})").free_symbols)
                 var = free_symbols[0] if free_symbols else sp.Symbol('x')
 
@@ -111,9 +99,6 @@ class OfflineMathEngine:
 
     @classmethod
     def _general_solve_calculus(cls, expr: str) -> dict:
-        """
-        General calculus solver: Differentiates any mathematical function.
-        """
         target = expr.replace("d/dx", "").replace("diff", "").strip("() ")
         steps = [
             f"Step 1: Target function -> f(x) = {target}",
@@ -147,9 +132,6 @@ class OfflineMathEngine:
 
     @classmethod
     def _general_symbolic_simplify(cls, expr: str) -> dict:
-        """
-        General symbolic simplification engine for surds, exponents, radicals, and trigonometry.
-        """
         steps = [
             f"Step 1: Input Expression: {expr}",
             "Step 2: Apply general symbolic simplification laws (exponents, roots, radicals, trig identities)"
@@ -179,9 +161,6 @@ class OfflineMathEngine:
 
     @classmethod
     def _general_solve_arithmetic(cls, expr: str) -> dict:
-        """
-        General arithmetic and numerical evaluator.
-        """
         steps = [
             f"Step 1: Numerical Expression -> {expr}",
             "Step 2: Evaluate using standard order of operations (PEMDAS/BODMAS)"
