@@ -29,11 +29,23 @@ st.title("🎨 Air Canvas - AI Math Solver")
 st.caption("Powered by Google Gemini 1.5/2.0 Flash AI & Universal Math Engine")
 
 # Sidebar Configuration
-st.sidebar.header("⚙️ Configuration & AI Key")
-st.sidebar.markdown("[Get Free Gemini API Key from Google AI Studio](https://aistudio.google.com/app/apikey)")
-user_api_key = st.sidebar.text_input("Paste Free Gemini API Key Here", type="password", help="Get 100% Free Key from Google AI Studio")
+st.sidebar.header("⚙️ Configuration & AI Status")
 
-solver = GeminiMathSolver(api_key=user_api_key)
+has_secrets_key = False
+try:
+    if "GEMINI_API_KEY" in st.secrets and len(st.secrets["GEMINI_API_KEY"].strip()) > 0:
+        has_secrets_key = True
+except Exception:
+    pass
+
+if has_secrets_key:
+    st.sidebar.success("✅ Google Gemini AI Active (Connected via Cloud Secrets)")
+else:
+    st.sidebar.markdown("[Get Free Gemini API Key from Google AI Studio](https://aistudio.google.com/app/apikey)")
+
+user_api_key = st.sidebar.text_input("Custom Gemini API Key (Optional)", type="password", help="Leave blank if set in Cloud Secrets")
+
+solver = GeminiMathSolver(api_key=user_api_key if user_api_key else None)
 
 tab1, tab2 = st.tabs(["📷 Mobile Camera", "📁 Upload Image"])
 
