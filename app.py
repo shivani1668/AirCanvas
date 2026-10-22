@@ -89,7 +89,7 @@ else:
     st.sidebar.markdown("""
     <div style='background: #e65100; border: 2px solid #f57c00; padding: 12px; border-radius: 2px;'>
         <div style='font-size: 0.9rem; font-weight: 800; color: #ffffff;'>🟡 Gemini AI Key Optional</div>
-        <div style='font-size: 0.75rem; color: #ffe0b2;'>Paste key below if needed</div>
+        <div style='font-size: 0.72rem;'>Paste key below if needed</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -247,7 +247,7 @@ if sidebar_page == "🏠 Home":
 
     with input_tab4:
         st.markdown("### 🖐️ Real-Time Live Webcam Air Canvas")
-        st.write("See yourself on camera! Turn ON drawing mode to draw colored lines in the air with your index finger.")
+        st.write("Turn ON camera & drawing to see yourself and draw colored lines in the air. Turn OFF to completely close the camera!")
 
         air_canvas_html = """
         <!DOCTYPE html>
@@ -258,7 +258,7 @@ if sidebar_page == "🏠 Home":
           <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
           <style>
             body { margin: 0; background: #000; color: #fff; font-family: system-ui, sans-serif; text-align: center; }
-            #canvas_container { position: relative; width: 640px; height: 480px; margin: 0 auto; border: 2px solid #1976d2; border-radius: 2px; overflow: hidden; }
+            #canvas_container { position: relative; width: 640px; height: 480px; margin: 0 auto; border: 2px solid #1976d2; border-radius: 2px; overflow: hidden; background: #121212; }
             #webcam_video { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); object-fit: cover; z-index: 1; display: block !important; }
             #drawing_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 2; }
             #hand_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 3; }
@@ -277,7 +277,7 @@ if sidebar_page == "🏠 Home":
             <canvas id="hand_canvas" width="640" height="480"></canvas>
           </div>
           <div class="btn-box">
-            <button id="draw_toggle_btn" class="toggle-btn-on" onclick="toggleDrawing()">✏️ Drawing: ON</button>
+            <button id="draw_toggle_btn" class="toggle-btn-on" onclick="toggleDrawing()">📹 Air Camera & Drawing: ON</button>
             <button onclick="clearAirCanvas()">🧹 Clear Canvas</button>
             <button onclick="changeColor('#00ffff')">🩵 Cyan</button>
             <button onclick="changeColor('#00ff00')">💚 Green</button>
@@ -303,14 +303,34 @@ if sidebar_page == "🏠 Home":
             drawCtx.lineWidth = 8;
             drawCtx.lineCap = 'round';
 
+            function stopWebcamStream() {
+              if (camera) {
+                try { camera.stop(); } catch(e){}
+              }
+              if (video && video.srcObject) {
+                try {
+                  video.srcObject.getTracks().forEach(track => track.stop());
+                } catch(e){}
+              }
+            }
+
             function toggleDrawing() {
               isDrawingEnabled = !isDrawingEnabled;
               if (isDrawingEnabled) {
-                drawToggleBtn.innerText = "✏️ Drawing: ON";
+                drawToggleBtn.innerText = "📹 Air Camera & Drawing: ON";
                 drawToggleBtn.className = "toggle-btn-on";
+                video.style.display = "block";
+                if (camera) camera.start();
+                statusDiv.innerText = "🔍 Camera & Air Drawing Started";
+                statusDiv.style.color = "#4caf50";
               } else {
-                drawToggleBtn.innerText = "✏️ Drawing: OFF";
+                drawToggleBtn.innerText = "📹 Air Camera & Drawing: OFF";
                 drawToggleBtn.className = "toggle-btn-off";
+                stopWebcamStream();
+                video.style.display = "none";
+                handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
+                statusDiv.innerText = "🛑 Camera & Air Drawing Turned OFF";
+                statusDiv.style.color = "#ff5252";
                 prevX = 0; prevY = 0;
               }
             }
@@ -324,17 +344,6 @@ if sidebar_page == "🏠 Home":
               currentColor = col;
             }
 
-            function stopWebcamStream() {
-              if (camera) {
-                try { camera.stop(); } catch(e){}
-              }
-              if (video && video.srcObject) {
-                try {
-                  video.srcObject.getTracks().forEach(track => track.stop());
-                } catch(e){}
-              }
-            }
-
             // Immediately stop camera tracks when tab or page switches
             window.addEventListener('beforeunload', stopWebcamStream);
             window.addEventListener('unload', stopWebcamStream);
@@ -345,7 +354,7 @@ if sidebar_page == "🏠 Home":
             function onResults(results) {
               handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
 
-              if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+              if (isDrawingEnabled && results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const landmarks = results.multiHandLandmarks[0];
 
                 // Draw MediaPipe Hand Skeleton Joints directly over video
@@ -358,7 +367,7 @@ if sidebar_page == "🏠 Home":
                 const indexUp = landmarks[8].y < landmarks[6].y;
                 const middleUp = landmarks[12].y < landmarks[10].y;
 
-                if (isDrawingEnabled && indexUp && !middleUp) {
+                if (indexUp && !middleUp) {
                   statusDiv.innerText = "✍️ DRAWING MODE ACTIVE (Index Finger Active)";
                   statusDiv.style.color = "#00ffff";
                   drawCtx.strokeStyle = currentColor;
@@ -370,15 +379,15 @@ if sidebar_page == "🏠 Home":
                   drawCtx.lineTo(ix, iy);
                   drawCtx.stroke();
                   prevX = ix; prevY = iy;
-                } else if (!isDrawingEnabled) {
-                  statusDiv.innerText = "⏸️ DRAWING IS TURNED OFF (Click 'Drawing: ON' to start drawing)";
-                  statusDiv.style.color = "#ff5252";
-                  prevX = 0; prevY = 0;
                 } else {
                   statusDiv.innerText = "✌️ HOVER MODE (Raise 1 Index Finger to Draw)";
                   statusDiv.style.color = "#ffb74d";
                   prevX = 0; prevY = 0;
                 }
+              } else if (!isDrawingEnabled) {
+                statusDiv.innerText = "🛑 Camera & Air Drawing Turned OFF";
+                statusDiv.style.color = "#ff5252";
+                prevX = 0; prevY = 0;
               } else {
                 statusDiv.innerText = "🖐️ Place hand in front of camera";
                 statusDiv.style.color = "#b0bec5";
@@ -397,7 +406,9 @@ if sidebar_page == "🏠 Home":
 
             camera = new Camera(video, {
               onFrame: async () => {
-                await hands.send({image: video});
+                if (isDrawingEnabled) {
+                  await hands.send({image: video});
+                }
               },
               width: 640,
               height: 480
