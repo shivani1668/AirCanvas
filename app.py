@@ -89,7 +89,7 @@ else:
     st.sidebar.markdown("""
     <div style='background: #e65100; border: 2px solid #f57c00; padding: 12px; border-radius: 2px;'>
         <div style='font-size: 0.9rem; font-weight: 800; color: #ffffff;'>🟡 Gemini AI Key Optional</div>
-        <div style='font-size: 0.72rem;'>Paste key below if needed</div>
+        <div style='font-size: 0.75rem; color: #ffe0b2;'>Paste key below if needed</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -298,6 +298,7 @@ if sidebar_page == "🏠 Home":
             let isDrawingEnabled = true;
             let currentColor = '#00ffff';
             let prevX = 0, prevY = 0;
+            let camera = null;
 
             drawCtx.lineWidth = 8;
             drawCtx.lineCap = 'round';
@@ -322,6 +323,24 @@ if sidebar_page == "🏠 Home":
             function changeColor(col) {
               currentColor = col;
             }
+
+            function stopWebcamStream() {
+              if (camera) {
+                try { camera.stop(); } catch(e){}
+              }
+              if (video && video.srcObject) {
+                try {
+                  video.srcObject.getTracks().forEach(track => track.stop());
+                } catch(e){}
+              }
+            }
+
+            // Immediately stop camera tracks when tab or page switches
+            window.addEventListener('beforeunload', stopWebcamStream);
+            window.addEventListener('unload', stopWebcamStream);
+            document.addEventListener('visibilitychange', () => {
+              if (document.hidden) stopWebcamStream();
+            });
 
             function onResults(results) {
               handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
@@ -376,7 +395,7 @@ if sidebar_page == "🏠 Home":
             });
             hands.onResults(onResults);
 
-            const camera = new Camera(video, {
+            camera = new Camera(video, {
               onFrame: async () => {
                 await hands.send({image: video});
               },
