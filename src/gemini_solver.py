@@ -46,6 +46,7 @@ class GeminiMathSolver:
     """
     Direct Google Gemini Multimodal Vision AI Model Engine.
     Analyzes uploaded/snapped images directly using Gemini Flash Vision Models.
+    Primary Endpoint: gemini-2.5-flash
     """
 
     def __init__(self, api_key: str = None):
@@ -68,6 +69,7 @@ class GeminiMathSolver:
     def solve_canvas_image(self, canvas_bgr: np.ndarray, pil_image: Image.Image = None) -> dict:
         """
         Directly sends the uploaded image to Google Gemini Flash AI Vision Model for live analysis.
+        Primary Model: models/gemini-2.5-flash
         """
         if not self.api_key:
             self.api_key = get_secret_key()
@@ -123,9 +125,10 @@ class GeminiMathSolver:
         }
         """
 
-        # Gemini Flash Models (gemini-2.5-flash primary)
+        # Gemini Flash Models (gemini-2.5-flash as primary endpoint)
         models_to_try = [
             'gemini-2.5-flash',
+            'models/gemini-2.5-flash',
             'gemini-1.5-flash',
             'gemini-1.5-flash-latest',
             'gemini-2.0-flash-exp',
