@@ -21,7 +21,7 @@ from utils.math_plotter import plot_equation_graph
 
 st.set_page_config(
     page_title="Air Canvas - AI Math Solver",
-    page_icon="🌌",
+    page_icon="⬛",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -40,21 +40,137 @@ try:
 except Exception:
     pass
 
-# LEFT SIDEBAR DESIGN (Clean 2-Option Layout)
+# Custom Solid High-Contrast Black & Bold UI Styling (Sharp Square Corners, No Blipping)
+st.markdown("""
+<style>
+    /* Solid Black App Background (No Glow, No Blipping) */
+    .stApp {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+    }
+
+    /* Force ALL Buttons, Inputs, Cards, and Elements to SHARP SQUARE SHAPES */
+    button, div, [class*="stButton"], [class*="stTextInput"], [class*="stSelectbox"], .glass-card, .category-card, .math-card, .final-answer-box {
+        border-radius: 2px !important;
+    }
+
+    /* Primary Bold Button Styling (Square & Bold Blue) */
+    div.stButton > button {
+        background-color: #1976d2 !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 1.15rem !important;
+        border: 2px solid #1565c0 !important;
+        border-radius: 2px !important;
+        padding: 12px 24px !important;
+        box-shadow: none !important;
+        animation: none !important;
+        transition: none !important;
+    }
+
+    div.stButton > button:hover {
+        background-color: #1565c0 !important;
+        border-color: #0d47a1 !important;
+    }
+
+    /* Header Titles in Bold Solid Colors */
+    .hero-title {
+        font-size: 3.5rem !important;
+        font-weight: 900 !important;
+        color: #ffffff !important;
+        text-align: center;
+        margin-bottom: 6px !important;
+        letter-spacing: -1px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem !important;
+        color: #b0bec5 !important;
+        text-align: center;
+        font-weight: 600 !important;
+        margin-bottom: 24px !important;
+    }
+
+    .hero-badge {
+        background-color: #1976d2 !important;
+        color: #ffffff !important;
+        border: 2px solid #1565c0 !important;
+        padding: 6px 16px !important;
+        border-radius: 2px !important;
+        font-size: 0.85rem !important;
+        font-weight: 800 !important;
+        display: inline-block;
+        box-shadow: none !important;
+    }
+
+    /* Square Solid Cards */
+    .glass-card {
+        background-color: #121212 !important;
+        border: 2px solid #2c2c2c !important;
+        border-radius: 2px !important;
+        padding: 24px !important;
+        margin-bottom: 20px !important;
+        box-shadow: none !important;
+    }
+
+    .category-card {
+        background-color: #1a1a1a !important;
+        border: 2px solid #333333 !important;
+        border-radius: 2px !important;
+        padding: 20px !important;
+        min-height: 120px !important;
+    }
+
+    /* Math Step Calculations in Times New Roman + Bold Green */
+    .step-explanation {
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        margin-top: 12px !important;
+    }
+
+    .math-card {
+        font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important;
+        font-size: 1.5rem !important;
+        font-weight: bold !important;
+        background-color: #181818 !important;
+        color: #388e3c !important;
+        padding: 12px 20px !important;
+        border-radius: 2px !important;
+        margin-top: 6px !important;
+        margin-bottom: 14px !important;
+        border-left: 6px solid #1976d2 !important;
+        display: block !important;
+    }
+
+    .final-answer-box {
+        font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important;
+        font-size: 1.7rem !important;
+        font-weight: bold !important;
+        background-color: #0d47a1 !important;
+        color: #ffffff !important;
+        padding: 18px 24px !important;
+        border-radius: 2px !important;
+        border: 2px solid #1976d2 !important;
+        margin-top: 20px !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# LEFT SIDEBAR DESIGN (Solid Black Square Theme)
 st.sidebar.markdown("""
 <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 20px;'>
-    <div style='background: linear-gradient(135deg, #7c3aed, #4f46e5); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.3rem; color: white;'>A</div>
+    <div style='background: #1976d2; width: 40px; height: 40px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.4rem; color: white;'>A</div>
     <div>
-        <div style='font-weight: 800; font-size: 1.2rem;'>Air Canvas</div>
-        <div style='font-size: 0.75rem; color: #818cf8;'>AI Math Solver</div>
+        <div style='font-weight: 900; font-size: 1.3rem; color: #ffffff;'>Air Canvas</div>
+        <div style='font-size: 0.8rem; color: #64b5f6; font-weight: bold;'>AI Math Solver</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Dark / Light Mode Switch Toggle in Sidebar
+# Dark / Light Mode Switch Toggle
 theme_toggle = st.sidebar.toggle("🌙 Dark Mode / ☀️ Light Mode", value=(st.session_state["theme_mode"] == "Dark"))
 st.session_state["theme_mode"] = "Dark" if theme_toggle else "Light"
-is_dark = (st.session_state["theme_mode"] == "Dark")
 
 # Simplified 2-Option Sidebar Navigation
 sidebar_page = st.sidebar.radio(
@@ -65,22 +181,22 @@ sidebar_page = st.sidebar.radio(
 
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
-# Bottom Sidebar Gemini AI Status Badge
+# Bottom Sidebar Gemini AI Status Badge (Square & Solid)
 if has_secrets_key:
     st.sidebar.markdown("""
-    <div style='background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px;'>
-        <div style='width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;'></div>
+    <div style='background: #1b5e20; border: 2px solid #2e7d32; padding: 12px; border-radius: 2px; display: flex; align-items: center; gap: 10px;'>
+        <div style='width: 12px; height: 12px; border-radius: 2px; background: #4caf50;'></div>
         <div>
-            <div style='font-size: 0.85rem; font-weight: 700;'>Gemini AI</div>
-            <div style='font-size: 0.72rem; color: #10b981;'>Connected</div>
+            <div style='font-size: 0.9rem; font-weight: 800; color: #ffffff;'>Gemini AI</div>
+            <div style='font-size: 0.75rem; color: #81c784; font-weight: bold;'>Connected</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 else:
     st.sidebar.markdown("""
-    <div style='background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); padding: 12px; border-radius: 12px;'>
-        <div style='font-size: 0.85rem; font-weight: 700; color: #f59e0b;'>🟡 Gemini AI Key Optional</div>
-        <div style='font-size: 0.72rem;'>Paste key below if needed</div>
+    <div style='background: #e65100; border: 2px solid #f57c00; padding: 12px; border-radius: 2px;'>
+        <div style='font-size: 0.9rem; font-weight: 800; color: #ffffff;'>🟡 Gemini AI Key Optional</div>
+        <div style='font-size: 0.75rem; color: #ffe0b2;'>Paste key below if needed</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -88,36 +204,6 @@ user_api_key = st.sidebar.text_input("Gemini API Key", type="password", help="Fr
 show_graph_manual = st.sidebar.checkbox("📊 Show Function Graph", value=False)
 
 solver = GeminiMathSolver(api_key=user_api_key if user_api_key else None)
-
-# Dynamic CSS Theme Injection (Dark vs Light Mode)
-if is_dark:
-    st.markdown("""
-    <style>
-        .stApp { background: radial-gradient(circle at 50% 20%, #15103a 0%, #080716 60%, #04030a 100%) !important; color: #ffffff !important; }
-        header[data-testid="stHeader"] { background: transparent !important; }
-        .hero-title { font-size: 3.5rem !important; font-weight: 800 !important; background: linear-gradient(135deg, #ffffff 0%, #818cf8 60%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; }
-        .hero-subtitle { font-size: 1.15rem !important; color: #94a3b8 !important; text-align: center; }
-        .glass-card { background: rgba(18, 17, 43, 0.65) !important; backdrop-filter: blur(16px); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 20px; padding: 24px; margin-bottom: 20px; }
-        .category-card { background: rgba(20, 20, 48, 0.6) !important; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px; }
-        .step-explanation { font-size: 1.1rem !important; font-weight: 600 !important; color: #f1f5f9 !important; margin-top: 10px !important; }
-        .math-card { font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important; font-size: 1.45rem !important; font-weight: bold !important; background-color: #12132a !important; color: #4ade80 !important; padding: 12px 20px !important; border-radius: 10px !important; margin-top: 6px !important; margin-bottom: 12px !important; border-left: 5px solid #818cf8 !important; display: block !important; }
-        .final-answer-box { font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important; font-size: 1.65rem !important; font-weight: bold !important; background-color: #171836 !important; color: #818cf8 !important; padding: 18px 24px !important; border-radius: 14px !important; border: 2px solid #818cf8 !important; margin-top: 18px !important; }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-        .stApp { background: #f8fafc !important; color: #0f172a !important; }
-        header[data-testid="stHeader"] { background: #ffffff !important; }
-        .hero-title { font-size: 3.5rem !important; font-weight: 800 !important; color: #1e1b4b !important; text-align: center; }
-        .hero-subtitle { font-size: 1.15rem !important; color: #475569 !important; text-align: center; }
-        .glass-card { background: #ffffff !important; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .category-card { background: #ffffff !important; border: 1px solid #cbd5e1; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .step-explanation { font-size: 1.1rem !important; font-weight: 600 !important; color: #1e293b !important; margin-top: 10px !important; }
-        .math-card { font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important; font-size: 1.45rem !important; font-weight: bold !important; background-color: #f1f5f9 !important; color: #15803d !important; padding: 12px 20px !important; border-radius: 10px !important; margin-top: 6px !important; margin-bottom: 12px !important; border-left: 5px solid #3b82f6 !important; display: block !important; }
-        .final-answer-box { font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important; font-size: 1.65rem !important; font-weight: bold !important; background-color: #eff6ff !important; color: #1d4ed8 !important; padding: 18px 24px !important; border-radius: 14px !important; border: 2px solid #3b82f6 !important; margin-top: 18px !important; }
-    </style>
-    """, unsafe_allow_html=True)
 
 def render_step_with_larger_math(step_text: str):
     step_str = str(step_text).strip()
@@ -134,7 +220,7 @@ def render_step_with_larger_math(step_text: str):
 
 # OPTION 1: HOME PAGE
 if sidebar_page == "🏠 Home":
-    st.markdown("<div style='text-align: center;'><span style='background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3); padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;'>✨ AI-Powered Learning</span></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center;'><span class='hero-badge'>✨ AI-POWERED LEARNING</span></div>", unsafe_allow_html=True)
     st.markdown("<h1 class='hero-title'>Math made simple.</h1>", unsafe_allow_html=True)
     st.markdown("<p class='hero-subtitle'>Upload a question. Understand every step. Learn at your pace.</p>", unsafe_allow_html=True)
 
@@ -160,7 +246,7 @@ if sidebar_page == "🏠 Home":
     if image_to_process is not None:
         st.image(image_to_process, caption="Math Question Image", use_column_width=True)
 
-        if st.button("✨ Solve Math Problem with Gemini AI", type="primary", use_container_width=True):
+        if st.button("✨ SOLVE MATH PROBLEM WITH GEMINI AI", type="primary", use_container_width=True):
             with st.spinner("Analyzing math problem & generating step-by-step AI solution..."):
                 img_np = np.array(image_to_process.convert('RGB'))
                 result = solver.solve_canvas_image(img_np, pil_image=image_to_process)
@@ -195,13 +281,13 @@ if sidebar_page == "🏠 Home":
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.markdown("<div class='category-card'><div style='font-size: 1.6rem; color: #c084fc;'>Σ</div><div style='font-weight: 700; font-size: 1.05rem;'>Algebra</div><div style='font-size: 0.8rem;'>Equations and expressions</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='category-card'><div style='font-size: 1.8rem; color: #ab47bc; font-weight: bold;'>Σ</div><div style='font-weight: 800; font-size: 1.1rem; color: #ffffff;'>Algebra</div><div style='font-size: 0.85rem; color: #b0bec5;'>Equations and expressions</div></div>", unsafe_allow_html=True)
     with col2:
-        st.markdown("<div class='category-card'><div style='font-size: 1.6rem; color: #60a5fa;'>📈</div><div style='font-weight: 700; font-size: 1.05rem;'>Calculus</div><div style='font-size: 0.8rem;'>Limits, derivatives, integrals</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='category-card'><div style='font-size: 1.8rem; color: #42a5f5; font-weight: bold;'>📈</div><div style='font-weight: 800; font-size: 1.1rem; color: #ffffff;'>Calculus</div><div style='font-size: 0.85rem; color: #b0bec5;'>Limits, derivatives, integrals</div></div>", unsafe_allow_html=True)
     with col3:
-        st.markdown("<div class='category-card'><div style='font-size: 1.6rem; color: #4ade80;'>📐</div><div style='font-weight: 700; font-size: 1.05rem;'>Geometry</div><div style='font-size: 0.8rem;'>Shapes, theorems and proofs</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='category-card'><div style='font-size: 1.8rem; color: #66bb6a; font-weight: bold;'>📐</div><div style='font-weight: 800; font-size: 1.1rem; color: #ffffff;'>Geometry</div><div style='font-size: 0.85rem; color: #b0bec5;'>Shapes, theorems and proofs</div></div>", unsafe_allow_html=True)
     with col4:
-        st.markdown("<div class='category-card'><div style='font-size: 1.6rem; color: #f472b6;'>🧠</div><div style='font-weight: 700; font-size: 1.05rem;'>Practice</div><div style='font-size: 0.8rem;'>Quizzes and hints</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='category-card'><div style='font-size: 1.8rem; color: #ff7043; font-weight: bold;'>🧠</div><div style='font-weight: 800; font-size: 1.1rem; color: #ffffff;'>Practice</div><div style='font-size: 0.85rem; color: #b0bec5;'>Quizzes and hints</div></div>", unsafe_allow_html=True)
 
     # "Recent Solutions" Section
     st.markdown("### Recent Solutions")
@@ -213,9 +299,9 @@ if sidebar_page == "🏠 Home":
             with hist_cols[idx]:
                 st.markdown(f"""
                 <div class='category-card'>
-                    <div style='font-weight: 700; font-size: 0.95rem;'>{item['expression']}</div>
-                    <div style='font-size: 0.78rem; color: #818cf8; margin-top: 4px;'>{item['category']}</div>
-                    <div style='font-size: 0.85rem; font-weight: bold; color: #4ade80; margin-top: 8px;'>Ans: {item['final_answer']}</div>
+                    <div style='font-weight: 800; font-size: 1rem; color: #ffffff;'>{item['expression']}</div>
+                    <div style='font-size: 0.8rem; color: #64b5f6; margin-top: 4px; font-weight: bold;'>{item['category']}</div>
+                    <div style='font-size: 0.9rem; font-weight: 900; color: #66bb6a; margin-top: 8px;'>Ans: {item['final_answer']}</div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -224,7 +310,6 @@ elif sidebar_page == "⚙️ Settings & Login":
     st.title("⚙️ Settings & Login Account")
     st.caption("Manage your profile, Gemini AI Key, and app settings")
 
-    # Login / Account Section
     st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
     st.markdown("### 👤 User Account & Profile")
 
@@ -234,23 +319,22 @@ elif sidebar_page == "⚙️ Settings & Login":
     if st.session_state["logged_in_user"] is None:
         user_email = st.text_input("Email / Username", value="student@aircanvas.ai")
         user_pass = st.text_input("Password", type="password", value="••••••••")
-        if st.button("🔐 Login / Sign Up", type="primary"):
+        if st.button("🔐 LOGIN / SIGN UP"):
             st.session_state["logged_in_user"] = user_email
             st.success(f"Welcome back, {user_email}!")
             st.experimental_rerun()
     else:
         st.success(f"Logged in as: **{st.session_state['logged_in_user']}**")
-        if st.button("Logout"):
+        if st.button("LOGOUT"):
             st.session_state["logged_in_user"] = None
             st.experimental_rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Gemini AI Status Section
     st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
     st.markdown("### 🤖 Gemini AI Connection Status")
     if has_secrets_key:
-        st.success("🟢 Google Gemini AI Active (Connected via Cloud Secrets)")
+        st.success("🟢 Google Gemini AI Connected via Cloud Secrets")
     else:
         st.warning("🟡 Gemini Key Not Found in Cloud Secrets (Paste key in sidebar)")
 
