@@ -38,9 +38,6 @@ if "theme_mode" not in st.session_state:
 if "typed_question" not in st.session_state:
     st.session_state["typed_question"] = ""
 
-if "air_detector" not in st.session_state:
-    st.session_state["air_detector"] = AirCanvasDetector()
-
 # Secrets Check
 has_secrets_key = False
 try:
@@ -89,7 +86,7 @@ else:
     st.sidebar.markdown("""
     <div style='background: #e65100; border: 2px solid #f57c00; padding: 12px; border-radius: 2px;'>
         <div style='font-size: 0.9rem; font-weight: 800; color: #ffffff;'>🟡 Gemini AI Key Optional</div>
-        <div style='font-size: 0.75rem; color: #ffe0b2;'>Paste key below if needed</div>
+        <div style='font-size: 0.72rem;'>Paste key below if needed</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -176,12 +173,12 @@ if sidebar_page == "🏠 Home":
 
     st.markdown("<div style='text-align: center;'><span style='background-color: #1976d2; color: #ffffff; padding: 6px 16px; border-radius: 2px; font-size: 0.85rem; font-weight: 800;'>✨ AI-POWERED LEARNING</span></div>", unsafe_allow_html=True)
     st.markdown("<h2 class='hero-title'>Math made simple.</h2>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Upload, snap, type, or draw in the air with MediaPipe Hand Tracking. Learn at your pace.</p>", unsafe_allow_html=True)
+    st.markdown("<p class='hero-subtitle'>Upload, snap, type, or draw live in the air with MediaPipe Hand Tracking. Learn at your pace.</p>", unsafe_allow_html=True)
 
     st.markdown("""
     <div class='glass-card' style='text-align: center; padding: 18px 24px; margin-bottom: 16px;'>
         <div style='font-size: 1.4rem; font-weight: 900; color: #ffffff;'>✨ Made with 💝 by Shivani</div>
-        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload image, snap with camera, type equation, or draw with MediaPipe 3D Air Canvas gestures</div>
+        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload image, snap with camera, type equation, or draw live in the air</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -189,7 +186,7 @@ if sidebar_page == "🏠 Home":
         "🖼️ Upload Image",
         "📷 Open Camera",
         "⌨️ Type Question",
-        "🖐️ MediaPipe Air Canvas"
+        "🖐️ MediaPipe Live Air Canvas"
     ])
 
     image_to_process = None
@@ -246,50 +243,134 @@ if sidebar_page == "🏠 Home":
             text_question_to_process = typed_val
 
     with input_tab4:
-        st.markdown("### 🖐️ MediaPipe 3D Hand Landmark Tracking & Air Drawing")
-        st.write("Draw mathematical equations in the air using finger gestures! MediaPipe detects your hand landmarks skeleton and tracks your index fingertip in real-time.")
+        st.markdown("### 🖐️ Real-Time Browser Air Canvas (MediaPipe 3D Hand Landmark Tracking)")
+        st.write("Draw in the air live using your webcam! Raising 1 finger (index) draws colored lines on screen in real-time. Raising 2 fingers (index + middle) lets you hover or clear!")
 
-        # Controls
-        ctrl_col1, ctrl_col2, ctrl_col3 = st.columns(3)
-        with ctrl_col1:
-            brush_color_name = st.selectbox("🎨 Brush Color", ["Blue", "Green", "Red", "Yellow", "White"])
-            color_map = {
-                "Blue": (255, 0, 0),
-                "Green": (0, 255, 0),
-                "Red": (0, 0, 255),
-                "Yellow": (0, 255, 255),
-                "White": (255, 255, 255)
+        air_canvas_html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+          <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+          <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+          <style>
+            body { margin: 0; background: #000; color: #fff; font-family: system-ui, sans-serif; text-align: center; }
+            #canvas_container { position: relative; width: 640px; height: 480px; margin: 0 auto; }
+            video { transform: scaleX(-1); display: none; }
+            canvas { position: absolute; left: 0; top: 0; transform: scaleX(-1); border: 2px solid #1976d2; border-radius: 2px; }
+            .btn-box { margin-top: 12px; display: flex; justify-content: center; gap: 10px; }
+            button { background: #1976d2; color: white; border: 2px solid #1565c0; padding: 10px 18px; font-weight: bold; cursor: pointer; border-radius: 2px; font-size: 0.95rem; }
+            button:hover { background: #1565c0; }
+            #status { margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #4caf50; }
+          </style>
+        </head>
+        <body>
+          <div id="canvas_container">
+            <video id="webcam_video" width="640" height="480" autoplay playsinline></video>
+            <canvas id="drawing_canvas" width="640" height="480"></canvas>
+            <canvas id="hand_canvas" width="640" height="480"></canvas>
+          </div>
+          <div class="btn-box">
+            <button onclick="clearAirCanvas()">🧹 Clear Canvas</button>
+            <button onclick="changeColor('#00ffff')">🩵 Cyan</button>
+            <button onclick="changeColor('#00ff00')">💚 Green</button>
+            <button onclick="changeColor('#ff0000')">❤️ Red</button>
+            <button onclick="changeColor('#ffff00')">💛 Yellow</button>
+          </div>
+          <div id="status">🔍 Initializing MediaPipe Hand Tracking Camera...</div>
+
+          <script>
+            const video = document.getElementById('webcam_video');
+            const drawCanvas = document.getElementById('drawing_canvas');
+            const drawCtx = drawCanvas.getContext('2d');
+            const handCanvas = document.getElementById('hand_canvas');
+            const handCtx = handCanvas.getContext('2d');
+            const statusDiv = document.getElementById('status');
+
+            let currentColor = '#00ffff';
+            let prevX = 0, prevY = 0;
+
+            drawCtx.lineWidth = 8;
+            drawCtx.lineCap = 'round';
+
+            function clearAirCanvas() {
+              drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+              prevX = 0; prevY = 0;
             }
-            st.session_state["air_detector"].set_brush_color(color_map[brush_color_name])
 
-        with ctrl_col2:
-            if st.button("🧹 Clear Air Canvas"):
-                st.session_state["air_detector"].clear_canvas()
-                st.success("Canvas Cleared!")
+            function changeColor(col) {
+              currentColor = col;
+            }
 
-        with ctrl_col3:
-            air_cam_on = st.toggle("📷 Enable Air Gesture Camera", value=False)
+            function onResults(results) {
+              handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
 
-        st.markdown("""
-        **Hand Gesture Guide:**
-        - ☝️ **1 Finger Up (Index)**: Drawing Mode (Draws colored strokes following your index finger).
-        - ✌️ **2 Fingers Up (Index + Middle)**: Selection Mode (Move fingertip without drawing).
-        """)
+              if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
 
-        if air_cam_on:
-            air_frame = st.camera_input("Snap Frame for Air Gesture Drawing", key="air_camera")
-            if air_frame is not None:
-                pil_air = Image.open(air_frame)
-                np_air = np.array(pil_air.convert('RGB'))
+                // Render MediaPipe Hand Skeleton Joints
+                drawConnectors(handCtx, landmarks, HAND_CONNECTIONS, {color: '#00FF00', lineWidth: 3});
+                drawLandmarks(handCtx, landmarks, {color: '#FF0000', lineWidth: 2, radius: 4});
 
-                # Process through MediaPipe 3D Hand Landmark Engine
-                processed_combined, mode_str = st.session_state["air_detector"].process_frame(np_air)
-                st.write(f"**Detected Mode**: `{mode_str}`")
+                const ix = landmarks[8].x * handCanvas.width;
+                const iy = landmarks[8].y * handCanvas.height;
 
-                st.image(processed_combined, caption="MediaPipe Hand Landmarks Skeleton & Air Drawing", use_column_width=True)
+                const indexUp = landmarks[8].y < landmarks[6].y;
+                const middleUp = landmarks[12].y < landmarks[10].y;
 
-                # Set as image to process
-                image_to_process = Image.fromarray(processed_combined)
+                if (indexUp && !middleUp) {
+                  statusDiv.innerText = "✍️ DRAWING MODE ACTIVE (Index Finger Drawing in Air)";
+                  statusDiv.style.color = "#00ffff";
+                  drawCtx.strokeStyle = currentColor;
+                  if (prevX === 0 && prevY === 0) {
+                    prevX = ix; prevY = iy;
+                  }
+                  drawCtx.beginPath();
+                  drawCtx.moveTo(prevX, prevY);
+                  drawCtx.lineTo(ix, iy);
+                  drawCtx.stroke();
+                  prevX = ix; prevY = iy;
+                } else {
+                  statusDiv.innerText = "✌️ HOVER MODE (Raise 1 Index Finger to Draw)";
+                  statusDiv.style.color = "#ffb74d";
+                  prevX = 0; prevY = 0;
+                }
+              } else {
+                statusDiv.innerText = "🖐️ Place your hand in front of the camera";
+                statusDiv.style.color = "#b0bec5";
+                prevX = 0; prevY = 0;
+              }
+            }
+
+            const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+            hands.setOptions({
+              maxNumHands: 1,
+              modelComplexity: 1,
+              minDetectionConfidence: 0.7,
+              minTrackingConfidence: 0.7
+            });
+            hands.onResults(onResults);
+
+            const camera = new Camera(video, {
+              onFrame: async () => {
+                await hands.send({image: video});
+              },
+              width: 640,
+              height: 480
+            });
+            camera.start();
+          </script>
+        </body>
+        </html>
+        """
+        st.components.v1.html(air_canvas_html, height=620)
+
+        # Upload air canvas snapshot for AI solution
+        st.markdown("---")
+        st.write("📷 **Snap & Solve Air Canvas Drawing**:")
+        air_snap = st.file_uploader("Upload or Snap Air Canvas Drawing to Solve", type=["png", "jpg", "jpeg"], key="air_snap_file")
+        if air_snap is not None:
+            image_to_process = Image.open(air_snap)
 
     # Process Image or Typed Question
     if image_to_process is not None or text_question_to_process is not None:
