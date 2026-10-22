@@ -25,6 +25,51 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# Custom Times New Roman + Math Symbol Typography Styling
+st.markdown("""
+<style>
+    /* Times New Roman + Symbol Font for Mathematical Typography */
+    html, body, [class*="css"], .stMarkdown, p, div, span, code, pre, h1, h2, h3, h4 {
+        font-family: 'Times New Roman', 'Times', 'Cambria Math', 'STIX Two Math', 'Symbol', serif !important;
+    }
+
+    .step-explanation {
+        font-family: 'Times New Roman', 'Times', 'Symbol', serif !important;
+        font-size: 1.15rem !important;
+        font-weight: 600 !important;
+        color: #f5e0dc !important;
+        margin-top: 10px !important;
+    }
+
+    .math-card {
+        font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important;
+        font-size: 1.4rem !important;
+        font-weight: bold !important;
+        background-color: #181825 !important;
+        color: #a6e3a1 !important;
+        padding: 10px 18px !important;
+        border-radius: 8px !important;
+        margin-top: 6px !important;
+        margin-bottom: 12px !important;
+        border-left: 5px solid #89b4fa !important;
+        letter-spacing: 0.5px !important;
+        display: block !important;
+    }
+
+    .final-answer-box {
+        font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important;
+        font-size: 1.6rem !important;
+        font-weight: bold !important;
+        background-color: #1e1e2e !important;
+        color: #89b4fa !important;
+        padding: 16px 20px !important;
+        border-radius: 12px !important;
+        border: 2px solid #89b4fa !important;
+        margin-top: 16px !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🎨 Air Canvas - AI Math Solver")
 st.caption("Powered by Google Gemini Flash AI & Universal Math Engine")
 
@@ -71,19 +116,19 @@ with tab2:
 
 def render_step_with_larger_math(step_text: str):
     """
-    Renders step explanation in regular font, and places the math calculation/formula
-    right below it on a new line in a larger, bold, readable font.
+    Renders step explanation in regular Times New Roman, and places the math calculation
+    right below it on a new line in a larger, bold Times New Roman + Symbol font card.
     """
     step_str = str(step_text).strip()
     if ":" in step_str:
         parts = step_str.split(":", 1)
         explanation = parts[0].strip()
         calc = parts[1].strip()
-        st.markdown(f"**• {explanation}:**")
+        st.markdown(f"<div class='step-explanation'>• {explanation}:</div>", unsafe_allow_html=True)
         if calc:
-            st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;### `{calc}`")
+            st.markdown(f"<div class='math-card'>{calc}</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"• {step_str}")
+        st.markdown(f"<div class='step-explanation'>• {step_str}</div>", unsafe_allow_html=True)
 
 if image_to_process is not None:
     st.image(image_to_process, caption="Math Problem Image", use_column_width=True)
@@ -102,8 +147,10 @@ if image_to_process is not None:
             for step in result['steps']:
                 render_step_with_larger_math(step)
 
-            st.markdown("---")
-            st.info(f"### 💡 Final Answer: {result['final_answer']}")
+            st.markdown(
+                f"<div class='final-answer-box'>💡 Final Answer: {result['final_answer']}</div>",
+                unsafe_allow_html=True
+            )
 
             expr_lower = result['expression'].lower()
             asked_for_graph = any(w in expr_lower for w in ["graph", "plot", "sketch", "curve", "draw"])
