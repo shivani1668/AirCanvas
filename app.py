@@ -13,9 +13,11 @@ import streamlit as st
 try:
     from src.gemini_solver import GeminiMathSolver
     from src.offline_solver import OfflineMathEngine
+    from src.air_canvas import AirCanvasDetector
 except ImportError:
     from gemini_solver import GeminiMathSolver
     from offline_solver import OfflineMathEngine
+    from air_canvas import AirCanvasDetector
 
 from utils.math_plotter import plot_equation_graph
 from utils.image_processing import preprocess_canvas_for_ai
@@ -35,6 +37,9 @@ if "theme_mode" not in st.session_state:
 
 if "typed_question" not in st.session_state:
     st.session_state["typed_question"] = ""
+
+if "air_detector" not in st.session_state:
+    st.session_state["air_detector"] = AirCanvasDetector()
 
 # Secrets Check
 has_secrets_key = False
@@ -171,12 +176,12 @@ if sidebar_page == "🏠 Home":
 
     st.markdown("<div style='text-align: center;'><span style='background-color: #1976d2; color: #ffffff; padding: 6px 16px; border-radius: 2px; font-size: 0.85rem; font-weight: 800;'>✨ AI-POWERED LEARNING</span></div>", unsafe_allow_html=True)
     st.markdown("<h2 class='hero-title'>Math made simple.</h2>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Upload, snap, type, or draw with OpenCV Air Canvas. Learn at your pace.</p>", unsafe_allow_html=True)
+    st.markdown("<p class='hero-subtitle'>Upload, snap, type, or draw in the air with MediaPipe Hand Tracking. Learn at your pace.</p>", unsafe_allow_html=True)
 
     st.markdown("""
     <div class='glass-card' style='text-align: center; padding: 18px 24px; margin-bottom: 16px;'>
         <div style='font-size: 1.4rem; font-weight: 900; color: #ffffff;'>✨ Made with 💝 by Shivani</div>
-        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload image, snap with camera, type equation, or draw with OpenCV gesture canvas</div>
+        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload image, snap with camera, type equation, or draw with MediaPipe 3D Air Canvas gestures</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -184,7 +189,7 @@ if sidebar_page == "🏠 Home":
         "🖼️ Upload Image",
         "📷 Open Camera",
         "⌨️ Type Question",
-        "🖐️ OpenCV Air Canvas"
+        "🖐️ MediaPipe Air Canvas"
     ])
 
     image_to_process = None
@@ -241,23 +246,54 @@ if sidebar_page == "🏠 Home":
             text_question_to_process = typed_val
 
     with input_tab4:
-        st.write("🖐️ **OpenCV Real-Time Canvas Image Preprocessing**")
-        st.info("Upload or snap your Air Canvas gesture drawing. OpenCV will threshold and sharpen it for AI solving.")
+        st.markdown("### 🖐️ MediaPipe 3D Hand Landmark Tracking & Air Drawing")
+        st.write("Draw mathematical equations in the air using finger gestures! MediaPipe detects your hand landmarks skeleton and tracks your index fingertip in real-time.")
 
-        canvas_file = st.file_uploader("Upload Air Canvas Gesture Drawing", type=["png", "jpg", "jpeg"], key="opencv_upload")
-        if canvas_file is not None:
-            raw_cv_img = Image.open(canvas_file)
-            np_cv = np.array(raw_cv_img.convert('RGB'))
+        # Controls
+        ctrl_col1, ctrl_col2, ctrl_col3 = st.columns(3)
+        with ctrl_col1:
+            brush_color_name = st.selectbox("🎨 Brush Color", ["Blue", "Green", "Red", "Yellow", "White"])
+            color_map = {
+                "Blue": (255, 0, 0),
+                "Green": (0, 255, 0),
+                "Red": (0, 0, 255),
+                "Yellow": (0, 255, 255),
+                "White": (255, 255, 255)
+            }
+            st.session_state["air_detector"].set_brush_color(color_map[brush_color_name])
 
-            # Apply OpenCV thresholding
-            processed_cv = preprocess_canvas_for_ai(np_cv)
-            image_to_process = Image.fromarray(processed_cv)
+        with ctrl_col2:
+            if st.button("🧹 Clear Air Canvas"):
+                st.session_state["air_detector"].clear_canvas()
+                st.success("Canvas Cleared!")
 
-            st.image(image_to_process, caption="OpenCV High-Contrast Preprocessed Canvas", use_column_width=True)
+        with ctrl_col3:
+            air_cam_on = st.toggle("📷 Enable Air Gesture Camera", value=False)
+
+        st.markdown("""
+        **Hand Gesture Guide:**
+        - ☝️ **1 Finger Up (Index)**: Drawing Mode (Draws colored strokes following your index finger).
+        - ✌️ **2 Fingers Up (Index + Middle)**: Selection Mode (Move fingertip without drawing).
+        """)
+
+        if air_cam_on:
+            air_frame = st.camera_input("Snap Frame for Air Gesture Drawing", key="air_camera")
+            if air_frame is not None:
+                pil_air = Image.open(air_frame)
+                np_air = np.array(pil_air.convert('RGB'))
+
+                # Process through MediaPipe 3D Hand Landmark Engine
+                processed_combined, mode_str = st.session_state["air_detector"].process_frame(np_air)
+                st.write(f"**Detected Mode**: `{mode_str}`")
+
+                st.image(processed_combined, caption="MediaPipe Hand Landmarks Skeleton & Air Drawing", use_column_width=True)
+
+                # Set as image to process
+                image_to_process = Image.fromarray(processed_combined)
 
     # Process Image or Typed Question
     if image_to_process is not None or text_question_to_process is not None:
-        if image_to_process is not None:
+        if image_to_process is not None and sidebar_page == "🏠 Home":
             st.image(image_to_process, caption="Math Question Image", use_column_width=True)
 
         solve_trigger = False
