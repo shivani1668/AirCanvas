@@ -18,6 +18,7 @@ except ImportError:
     from offline_solver import OfflineMathEngine
 
 from utils.math_plotter import plot_equation_graph
+from utils.image_processing import preprocess_canvas_for_ai
 
 st.set_page_config(
     page_title="Air Canvas - AI Math Solver",
@@ -170,16 +171,21 @@ if sidebar_page == "🏠 Home":
 
     st.markdown("<div style='text-align: center;'><span style='background-color: #1976d2; color: #ffffff; padding: 6px 16px; border-radius: 2px; font-size: 0.85rem; font-weight: 800;'>✨ AI-POWERED LEARNING</span></div>", unsafe_allow_html=True)
     st.markdown("<h2 class='hero-title'>Math made simple.</h2>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Upload, snap, or type a question. Learn at your pace.</p>", unsafe_allow_html=True)
+    st.markdown("<p class='hero-subtitle'>Upload, snap, type, or draw with OpenCV Air Canvas. Learn at your pace.</p>", unsafe_allow_html=True)
 
     st.markdown("""
     <div class='glass-card' style='text-align: center; padding: 18px 24px; margin-bottom: 16px;'>
         <div style='font-size: 1.4rem; font-weight: 900; color: #ffffff;'>✨ Made with 💝 by Shivani</div>
-        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload image, snap with camera, or type equation with math symbol keyboard</div>
+        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload image, snap with camera, type equation, or draw with OpenCV gesture canvas</div>
     </div>
     """, unsafe_allow_html=True)
 
-    input_tab1, input_tab2, input_tab3 = st.tabs(["🖼️ Upload Image", "📷 Open Camera", "⌨️ Type Question"])
+    input_tab1, input_tab2, input_tab3, input_tab4 = st.tabs([
+        "🖼️ Upload Image",
+        "📷 Open Camera",
+        "⌨️ Type Question",
+        "🖐️ OpenCV Air Canvas"
+    ])
 
     image_to_process = None
     text_question_to_process = None
@@ -197,7 +203,6 @@ if sidebar_page == "🏠 Home":
                 image_to_process = Image.open(camera_file)
 
     with input_tab3:
-        # TEXT AREA FIRST AT THE VERY TOP!
         typed_val = st.text_area(
             "Question Text Area",
             value=st.session_state.get("typed_question", ""),
@@ -234,6 +239,21 @@ if sidebar_page == "🏠 Home":
 
         if st.button("✨ SOLVE TYPED QUESTION WITH AI", type="primary", use_container_width=True):
             text_question_to_process = typed_val
+
+    with input_tab4:
+        st.write("🖐️ **OpenCV Real-Time Canvas Image Preprocessing**")
+        st.info("Upload or snap your Air Canvas gesture drawing. OpenCV will threshold and sharpen it for AI solving.")
+
+        canvas_file = st.file_uploader("Upload Air Canvas Gesture Drawing", type=["png", "jpg", "jpeg"], key="opencv_upload")
+        if canvas_file is not None:
+            raw_cv_img = Image.open(canvas_file)
+            np_cv = np.array(raw_cv_img.convert('RGB'))
+
+            # Apply OpenCV thresholding
+            processed_cv = preprocess_canvas_for_ai(np_cv)
+            image_to_process = Image.fromarray(processed_cv)
+
+            st.image(image_to_process, caption="OpenCV High-Contrast Preprocessed Canvas", use_column_width=True)
 
     # Process Image or Typed Question
     if image_to_process is not None or text_question_to_process is not None:
