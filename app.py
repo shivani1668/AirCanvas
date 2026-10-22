@@ -40,9 +40,9 @@ try:
 except Exception:
     pass
 
-# LEFT SIDEBAR DESIGN
+# LEFT SIDEBAR DESIGN (Clean 2-Option Layout)
 st.sidebar.markdown("""
-<div style='display: flex; align-items: center; gap: 12px; margin-bottom: 16px;'>
+<div style='display: flex; align-items: center; gap: 12px; margin-bottom: 20px;'>
     <div style='background: linear-gradient(135deg, #7c3aed, #4f46e5); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.3rem; color: white;'>A</div>
     <div>
         <div style='font-weight: 800; font-size: 1.2rem;'>Air Canvas</div>
@@ -56,10 +56,10 @@ theme_toggle = st.sidebar.toggle("🌙 Dark Mode / ☀️ Light Mode", value=(st
 st.session_state["theme_mode"] = "Dark" if theme_toggle else "Light"
 is_dark = (st.session_state["theme_mode"] == "Dark")
 
-# Navigation Menu
+# Simplified 2-Option Sidebar Navigation
 sidebar_page = st.sidebar.radio(
     "Navigation Menu",
-    ["🏠 Home", "📷 Upload / Capture", "🧮 Math Tools", "📖 Learning Mode", "🕒 History", "📊 Graph", "🧠 Practice Quiz", "⚙️ Settings"],
+    ["🏠 Home", "⚙️ Settings & Login"],
     label_visibility="collapsed"
 )
 
@@ -105,7 +105,6 @@ if is_dark:
     </style>
     """, unsafe_allow_html=True)
 else:
-    # Light Mode Theme Styling
     st.markdown("""
     <style>
         .stApp { background: #f8fafc !important; color: #0f172a !important; }
@@ -133,8 +132,8 @@ def render_step_with_larger_math(step_text: str):
     else:
         st.markdown(f"<div class='step-explanation'>• {step_str}</div>", unsafe_allow_html=True)
 
-# PAGE 1 & 2: HOME / UPLOAD & CAPTURE
-if sidebar_page in ["🏠 Home", "📷 Upload / Capture"]:
+# OPTION 1: HOME PAGE
+if sidebar_page == "🏠 Home":
     st.markdown("<div style='text-align: center;'><span style='background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3); padding: 6px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;'>✨ AI-Powered Learning</span></div>", unsafe_allow_html=True)
     st.markdown("<h1 class='hero-title'>Math made simple.</h1>", unsafe_allow_html=True)
     st.markdown("<p class='hero-subtitle'>Upload a question. Understand every step. Learn at your pace.</p>", unsafe_allow_html=True)
@@ -204,123 +203,57 @@ if sidebar_page in ["🏠 Home", "📷 Upload / Capture"]:
     with col4:
         st.markdown("<div class='category-card'><div style='font-size: 1.6rem; color: #f472b6;'>🧠</div><div style='font-weight: 700; font-size: 1.05rem;'>Practice</div><div style='font-size: 0.8rem;'>Quizzes and hints</div></div>", unsafe_allow_html=True)
 
-# PAGE 3: HISTORY (Main Page History View!)
-elif sidebar_page == "🕒 History":
-    st.title("🕒 Solution History")
-    st.caption("View, review, or delete all previously solved math questions")
-
+    # "Recent Solutions" Section
+    st.markdown("### Recent Solutions")
     if not st.session_state["history"]:
-        st.info("No saved solutions yet. Upload a math question on the Home tab to build your history!")
+        st.info("No recent solutions yet. Upload a math question above to see it here!")
     else:
-        if st.button("🗑️ Clear All History"):
-            st.session_state["history"] = []
+        hist_cols = st.columns(min(4, len(st.session_state["history"])))
+        for idx, item in enumerate(reversed(st.session_state["history"][:4])):
+            with hist_cols[idx]:
+                st.markdown(f"""
+                <div class='category-card'>
+                    <div style='font-weight: 700; font-size: 0.95rem;'>{item['expression']}</div>
+                    <div style='font-size: 0.78rem; color: #818cf8; margin-top: 4px;'>{item['category']}</div>
+                    <div style='font-size: 0.85rem; font-weight: bold; color: #4ade80; margin-top: 8px;'>Ans: {item['final_answer']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+# OPTION 2: SETTINGS & LOGIN PAGE
+elif sidebar_page == "⚙️ Settings & Login":
+    st.title("⚙️ Settings & Login Account")
+    st.caption("Manage your profile, Gemini AI Key, and app settings")
+
+    # Login / Account Section
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+    st.markdown("### 👤 User Account & Profile")
+
+    if "logged_in_user" not in st.session_state:
+        st.session_state["logged_in_user"] = None
+
+    if st.session_state["logged_in_user"] is None:
+        user_email = st.text_input("Email / Username", value="student@aircanvas.ai")
+        user_pass = st.text_input("Password", type="password", value="••••••••")
+        if st.button("🔐 Login / Sign Up", type="primary"):
+            st.session_state["logged_in_user"] = user_email
+            st.success(f"Welcome back, {user_email}!")
+            st.experimental_rerun()
+    else:
+        st.success(f"Logged in as: **{st.session_state['logged_in_user']}**")
+        if st.button("Logout"):
+            st.session_state["logged_in_user"] = None
             st.experimental_rerun()
 
-        for idx, item in enumerate(reversed(st.session_state["history"])):
-            st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
-            st.markdown(f"### Question {len(st.session_state['history']) - idx}: `{item['expression']}`")
-            st.markdown(f"**Category**: {item['category']} (*{item['source']}*)")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown("#### Step-by-Step Breakdown:")
-            for s in item['steps']:
-                render_step_with_larger_math(s)
-
-            st.markdown(
-                f"<div class='final-answer-box'>💡 Final Answer: {item['final_answer']}</div>",
-                unsafe_allow_html=True
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
-
-# PAGE 4: MATH TOOLS
-elif sidebar_page == "🧮 Math Tools":
-    st.title("🧮 Math Tools & Calculators")
-    st.caption("Quick access to algebra, calculus, geometry, and matrix tools")
-
-    tool_type = st.selectbox("Select Calculator Tool", ["Quadratic Solver", "Calculus Derivative", "Surd Rationalizer"])
-
-    if tool_type == "Quadratic Solver":
-        st.subheader("Quadratic Equation Solver (ax² + bx + c = 0)")
-        a = st.number_input("Coefficient a", value=1.0)
-        b = st.number_input("Coefficient b", value=-5.0)
-        c = st.number_input("Coefficient c", value=6.0)
-
-        if st.button("Solve Quadratic Equation"):
-            res = OfflineMathEngine.solve_expression(f"{a}*x^2 + ({b})*x + ({c}) = 0")
-            st.markdown(f"<div class='final-answer-box'>Result: {res['final_answer']}</div>", unsafe_allow_html=True)
-
-    elif tool_type == "Calculus Derivative":
-        st.subheader("Derivative Calculator d/dx(f(x))")
-        func = st.text_input("Function f(x)", value="x^3 + 2*x^2 - 5*x + 7")
-        if st.button("Calculate Derivative"):
-            res = OfflineMathEngine.solve_expression(f"d/dx({func})")
-            st.markdown(f"<div class='final-answer-box'>Derivative: {res['final_answer']}</div>", unsafe_allow_html=True)
-
-# PAGE 5: LEARNING MODE
-elif sidebar_page == "📖 Learning Mode":
-    st.title("📖 Learning Mode & Concept Formulas")
-    st.caption("Understand fundamental concepts, formulas, and step-by-step hints")
-
-    st.info("💡 **Hint System Active**: Review formulas and step-by-step concepts before solving problems.")
-    concept = st.selectbox("Math Concept", ["Quadratic Formula", "Surd Rationalization", "Exponent Rules", "Differentiation Rules"])
-
-    if concept == "Quadratic Formula":
-        st.markdown("""
-        ### Quadratic Formula:
-        For $ax^2 + bx + c = 0$:
-        $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
-        - **Discriminant $D = b^2 - 4ac$**:
-          - $D > 0$: 2 real distinct roots.
-          - $D = 0$: 1 repeated real root.
-          - $D < 0$: 2 complex conjugate roots.
-        """)
-
-    elif concept == "Surd Rationalization":
-        st.markdown("""
-        ### Surd Rationalization:
-        To rationalize $\\frac{a}{\\sqrt{b} + c}$, multiply numerator & denominator by conjugate $(\\sqrt{b} - c)$:
-        $$\\frac{a(\\sqrt{b} - c)}{(\\sqrt{b} + c)(\\sqrt{b} - c)} = \\frac{a(\\sqrt{b} - c)}{b - c^2}$$
-        """)
-
-# PAGE 6: FUNCTION GRAPH
-elif sidebar_page == "📊 Graph":
-    st.title("📊 Function Graph Plotter")
-    st.caption("Plot mathematical functions dynamically")
-
-    func_expr = st.text_input("Enter Function (e.g. y = x^2 - 4, sin(x), 2*x + 5)", value="x^2 - 4")
-    if st.button("Generate Graph"):
-        try:
-            graph_img = plot_equation_graph(func_expr)
-            st.image(graph_img, caption=f"Plot of {func_expr}", use_column_width=True)
-        except Exception as e:
-            st.error(f"Error plotting graph: {e}")
-
-# PAGE 7: PRACTICE QUIZ
-elif sidebar_page == "🧠 Practice Quiz":
-    st.title("🧠 Practice Quiz")
-    st.caption("Test your mathematical skills with instant feedback")
-
-    st.markdown("### Question 1: Solve $\\frac{5}{\\sqrt{2} + 1}$")
-    ans = st.radio("Select Choice:", ["A) 5√2", "B) 5√2 - 5", "C) 2 - √2", "D) √2 - 5"])
-
-    if st.button("Submit Answer"):
-        if "B) 5√2 - 5" in ans:
-            st.success("🎉 Correct! Option B is the right choice!")
-        else:
-            st.error("❌ Incorrect. Correct choice is Option B: 5√2 - 5")
-
-# PAGE 8: SETTINGS
-elif sidebar_page == "⚙️ Settings":
-    st.title("⚙️ Settings & AI Configuration")
-    st.caption("Configure Gemini AI API and app appearance")
-
-    st.markdown("### Gemini AI Connection Status")
+    # Gemini AI Status Section
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+    st.markdown("### 🤖 Gemini AI Connection Status")
     if has_secrets_key:
-        st.success("🟢 Google Gemini AI Connected via Cloud Secrets")
+        st.success("🟢 Google Gemini AI Active (Connected via Cloud Secrets)")
     else:
-        st.warning("🟡 Gemini Key Not Found in Cloud Secrets (You can paste it in the sidebar)")
+        st.warning("🟡 Gemini Key Not Found in Cloud Secrets (Paste key in sidebar)")
 
-    st.markdown("### Active Model Endpoint")
-    st.write("Active Model: **gemini-3.8-flash** (`models/gemini-3.8-flash`)")
-
-    st.markdown("---")
+    st.write("Active AI Model: **gemini-3.8-flash** (`models/gemini-3.8-flash`)")
     st.markdown("[Get Free Gemini API Key from Google AI Studio](https://aistudio.google.com/app/apikey)")
+    st.markdown("</div>", unsafe_allow_html=True)
