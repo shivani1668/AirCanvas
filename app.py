@@ -87,9 +87,11 @@ else:
 user_api_key = st.sidebar.text_input("Gemini API Key", type="password", help="Free key at aistudio.google.com")
 show_graph_manual = st.sidebar.checkbox("📊 Show Function Graph", value=False)
 
+st.sidebar.markdown("<br><div style='font-weight: bold; font-size: 0.85rem;'>Made with 💝 by Shivani</div>", unsafe_allow_html=True)
+
 solver = GeminiMathSolver(api_key=user_api_key if user_api_key else None)
 
-# Dynamic CSS Theme Injection (Both Sidebar & Homepage Switch)
+# Dynamic CSS Theme Injection
 if is_dark:
     st.markdown("""
     <style>
@@ -116,7 +118,6 @@ if is_dark:
     </style>
     """, unsafe_allow_html=True)
 else:
-    # Light Mode Theme Styling (Sidebar + Homepage Both Light)
     st.markdown("""
     <style>
         .stApp, [data-testid="stAppViewContainer"] {
@@ -157,7 +158,6 @@ def render_step_with_larger_math(step_text: str):
 
 # OPTION 1: HOME PAGE
 if sidebar_page == "🏠 Home":
-    # Centered Homepage Title "Air Canvas"
     st.markdown("""
     <div style='text-align: center; margin-bottom: 16px;'>
         <h1 class='hero-main-title'>🌌 Air Canvas</h1>
@@ -168,6 +168,14 @@ if sidebar_page == "🏠 Home":
     st.markdown("<div style='text-align: center;'><span style='background-color: #1976d2; color: #ffffff; padding: 6px 16px; border-radius: 2px; font-size: 0.85rem; font-weight: 800;'>✨ AI-POWERED LEARNING</span></div>", unsafe_allow_html=True)
     st.markdown("<h2 class='hero-title'>Math made simple.</h2>", unsafe_allow_html=True)
     st.markdown("<p class='hero-subtitle'>Upload a question. Understand every step. Learn at your pace.</p>", unsafe_allow_html=True)
+
+    # Central Box Displaying "Made with 💝 by Shivani"
+    st.markdown("""
+    <div class='glass-card' style='text-align: center; padding: 18px 24px; margin-bottom: 16px;'>
+        <div style='font-size: 1.4rem; font-weight: 900; color: #ffffff;'>✨ Made with 💝 by Shivani</div>
+        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload a photo of your math problem or snap with camera</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
     input_tab1, input_tab2 = st.tabs(["🖼️ Upload Image", "📷 Open Camera"])
@@ -249,6 +257,10 @@ if sidebar_page == "🏠 Home":
                     <div style='font-size: 0.9rem; font-weight: 900; color: #388e3c; margin-top: 8px;'>Ans: {item['final_answer']}</div>
                 </div>
                 """, unsafe_allow_html=True)
+
+    # App Footer
+    st.markdown("---")
+    st.markdown("<div style='text-align: center; font-size: 1.1rem; font-weight: 800; color: #1976d2;'>✨ Made with 💝 by Shivani ✨</div>", unsafe_allow_html=True)
 
 # OPTION 2: SETTINGS & LOGIN PAGE
 elif sidebar_page == "⚙️ Settings & Login":
