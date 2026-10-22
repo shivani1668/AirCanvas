@@ -45,7 +45,7 @@ def enhance_math_image(pil_img: Image.Image) -> Image.Image:
 class GeminiMathSolver:
     """
     Direct Google Gemini Multimodal Vision AI Model Engine.
-    Analyzes uploaded/snapped images directly with ZERO pre-fed solutions.
+    Analyzes uploaded/snapped images directly using Gemini Flash Vision Models.
     """
 
     def __init__(self, api_key: str = None):
@@ -68,7 +68,6 @@ class GeminiMathSolver:
     def solve_canvas_image(self, canvas_bgr: np.ndarray, pil_image: Image.Image = None) -> dict:
         """
         Directly sends the uploaded image to Google Gemini Flash AI Vision Model for live analysis.
-        NO pre-fed or hardcoded fallback solutions.
         """
         if not self.api_key:
             self.api_key = get_secret_key()
@@ -79,7 +78,6 @@ class GeminiMathSolver:
             except Exception:
                 pass
 
-        # If API key is missing, prompt user for API key without returning pre-fed math
         if not HAS_GEMINI or not self.api_key:
             return {
                 "expression": "Gemini API Key Required",
@@ -125,7 +123,13 @@ class GeminiMathSolver:
         }
         """
 
-        models_to_try = ['gemini-1.5-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-pro']
+        # Gemini Flash Models
+        models_to_try = [
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-latest',
+            'gemini-2.0-flash-exp',
+            'gemini-2.0-flash'
+        ]
         last_error = ""
 
         for model_name in models_to_try:
