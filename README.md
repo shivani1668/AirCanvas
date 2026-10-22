@@ -77,7 +77,7 @@ The web application is deployed on **Streamlit Cloud** and accessible 24/7 globa
                   |  GOOGLE GEMINI FLASH VISION   |   |   OFFLINE SYMPY MATH ENGINE   |
                   |  - gemini-3.8-flash           |   |   - Symbolic Differentiation  |
                   |  - gemini-2.5-flash           |   |   - Indefinite & Definite ∫   |
-                  |  - gemini-1.5-flash           |   |   - Equation Balancing        |
+                  |  - gemini-2.0-flash           |   |   - Equation Balancing        |
                   +---------------+---------------+   +-------------+---------------+
                                   |                                 |
                                   +----------------+----------------+
@@ -105,11 +105,12 @@ The web application is deployed on **Streamlit Cloud** and accessible 24/7 globa
 ## ✨ Key Features & Capability Breakdown
 
 ### 1. 🤖 Multimodal AI Vision & OCR Engine
-- **Direct Gemini Flash Integration**: Uses Google's latest multimodal models (`gemini-3.8-flash`, `gemini-2.5-flash`, `gemini-1.5-flash`) for real-time Optical Character Recognition (OCR) and mathematical reasoning directly from images.
+- **Direct Gemini Flash Integration**: Uses Google's latest multimodal models (`gemini-3.8-flash`, `gemini-2.5-flash`) for real-time Optical Character Recognition (OCR) and mathematical reasoning directly from images.
 - **Image Enhancement Pipeline**: Integrates `PIL.ImageEnhance.Contrast` to boost low-contrast smartphone photos, making fine superscripts, fractional bars, and root symbols clearly legible.
 
 ### 2. 🔣 Interactive Math Symbol Virtual Keyboard
-- **Quick-Insert Symbol Palette**: Provides dedicated buttons for complex mathematical symbols:
+- **Top Text Input Area**: Places the question text box at the very top of the tab for immediate typing.
+- **Quick-Insert Symbol Palette**: Provides dedicated buttons placed directly below the text box for complex mathematical symbols:
   - Square Roots: `√`
   - Exponents / Powers: `x²` (`^2`)
   - Division & Fractions: `/`
@@ -117,7 +118,7 @@ The web application is deployed on **Streamlit Cloud** and accessible 24/7 globa
   - Derivatives: `d/dx`
   - Integrals: `∫` (Indefinite) & `∫_a^b` (Definite)
   - Differentials: `dx`, `dy`
-  - Constants & Greek Symbols: `π`, `θ`, `∞`, `≤`, `≥`, `≠`
+  - Constants & Greek Symbols: `π`, `θ`, `∞`, `≠`
 - **Default Placeholder**: Features an intuitive default text area with `placeholder="Type question here..."` for quick typing.
 
 ### 3. ✍️ Clean Mathematical Typography & Formatting
@@ -247,8 +248,8 @@ To enable live Multimodal AI image recognition and LLM reasoning:
 
 ### Example 1: Calculus Integration (`∫ cos(2x) dx`)
 1. Open the **`⌨️ Type Question`** tab on the homepage.
-2. Click the **`∫ (Integral)`** button from the math symbol keyboard.
-3. Type `cos(2x) dx` and click **`✨ SOLVE TYPED QUESTION WITH AI`**.
+2. Type `∫ cos(2x) dx` into the text box at the top (or click **`∫ (Integral)`** from the keyboard below).
+3. Click **`✨ SOLVE TYPED QUESTION WITH AI`**.
 4. **Result**:
    - **Step 1**: Identify integral $\int \cos(2x) \, dx$.
    - **Step 2**: Apply u-substitution: Let $u = 2x \implies du = 2 \, dx \implies dx = \frac{du}{2}$.

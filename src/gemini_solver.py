@@ -81,7 +81,7 @@ def clean_latex_to_plain_math(text: str) -> str:
 class GeminiMathSolver:
     """
     Direct Google Gemini Multimodal Vision & Text AI Model Engine.
-    Primary Endpoint: gemini-3.8-flash
+    Primary Endpoint: gemini-3.8-flash, gemini-2.5-flash
     """
 
     def __init__(self, api_key: str = None):
@@ -146,8 +146,6 @@ class GeminiMathSolver:
             'models/gemini-3.8-flash',
             'gemini-2.5-flash',
             'models/gemini-2.5-flash',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-latest',
             'gemini-2.0-flash-exp',
             'gemini-2.0-flash'
         ]
@@ -242,8 +240,6 @@ class GeminiMathSolver:
             'models/gemini-3.8-flash',
             'gemini-2.5-flash',
             'models/gemini-2.5-flash',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-latest',
             'gemini-2.0-flash-exp',
             'gemini-2.0-flash'
         ]
