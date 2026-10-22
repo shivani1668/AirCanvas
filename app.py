@@ -26,7 +26,7 @@ st.set_page_config(
 )
 
 st.title("🎨 Air Canvas - AI Math Solver")
-st.caption("Powered by Google Gemini 1.5/2.0 Flash AI & Universal Math Engine")
+st.caption("Powered by Google Gemini Flash AI & Universal Math Engine")
 
 # Sidebar Configuration
 st.sidebar.header("⚙️ Configuration & AI Status")
@@ -44,6 +44,9 @@ else:
     st.sidebar.markdown("[Get Free Gemini API Key from Google AI Studio](https://aistudio.google.com/app/apikey)")
 
 user_api_key = st.sidebar.text_input("Custom Gemini API Key (Optional)", type="password", help="Leave blank if set in Cloud Secrets")
+
+# Optional Graph Checkbox
+show_graph_manual = st.sidebar.checkbox("📊 Show Function Graph", value=False)
 
 solver = GeminiMathSolver(api_key=user_api_key if user_api_key else None)
 
@@ -86,8 +89,13 @@ if image_to_process is not None:
 
             st.info(f"### 💡 Final Answer: {result['final_answer']}")
 
-            try:
-                graph_img = plot_equation_graph(result['expression'])
-                st.image(graph_img, caption="Function Graph Visualizer", use_column_width=True)
-            except Exception:
-                pass
+            # Graph Condition: ONLY if explicitly asked in question OR if user enabled graph checkbox
+            expr_lower = result['expression'].lower()
+            asked_for_graph = any(w in expr_lower for w in ["graph", "plot", "sketch", "curve", "draw"])
+
+            if asked_for_graph or show_graph_manual:
+                try:
+                    graph_img = plot_equation_graph(result['expression'])
+                    st.image(graph_img, caption="Function Graph Visualizer", use_column_width=True)
+                except Exception:
+                    pass
