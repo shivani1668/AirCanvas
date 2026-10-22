@@ -247,7 +247,7 @@ if sidebar_page == "🏠 Home":
 
     with input_tab4:
         st.markdown("### 🖐️ Real-Time Live Webcam Air Canvas")
-        st.write("See yourself on camera! Raising 1 index finger draws colored lines directly over your camera feed in real-time. Raising 2 fingers lets you hover or clear!")
+        st.write("See yourself on camera! Turn ON drawing mode to draw colored lines in the air with your index finger.")
 
         air_canvas_html = """
         <!DOCTYPE html>
@@ -262,9 +262,11 @@ if sidebar_page == "🏠 Home":
             #webcam_video { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); object-fit: cover; z-index: 1; display: block !important; }
             #drawing_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 2; }
             #hand_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 3; }
-            .btn-box { margin-top: 12px; display: flex; justify-content: center; gap: 10px; }
+            .btn-box { margin-top: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
             button { background: #1976d2; color: white; border: 2px solid #1565c0; padding: 10px 18px; font-weight: bold; cursor: pointer; border-radius: 2px; font-size: 0.95rem; }
             button:hover { background: #1565c0; }
+            .toggle-btn-on { background: #2e7d32 !important; border-color: #1b5e20 !important; }
+            .toggle-btn-off { background: #c62828 !important; border-color: #8e0000 !important; }
             #status { margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #4caf50; }
           </style>
         </head>
@@ -275,6 +277,7 @@ if sidebar_page == "🏠 Home":
             <canvas id="hand_canvas" width="640" height="480"></canvas>
           </div>
           <div class="btn-box">
+            <button id="draw_toggle_btn" class="toggle-btn-on" onclick="toggleDrawing()">✏️ Drawing: ON</button>
             <button onclick="clearAirCanvas()">🧹 Clear Canvas</button>
             <button onclick="changeColor('#00ffff')">🩵 Cyan</button>
             <button onclick="changeColor('#00ff00')">💚 Green</button>
@@ -290,12 +293,26 @@ if sidebar_page == "🏠 Home":
             const handCanvas = document.getElementById('hand_canvas');
             const handCtx = handCanvas.getContext('2d');
             const statusDiv = document.getElementById('status');
+            const drawToggleBtn = document.getElementById('draw_toggle_btn');
 
+            let isDrawingEnabled = true;
             let currentColor = '#00ffff';
             let prevX = 0, prevY = 0;
 
             drawCtx.lineWidth = 8;
             drawCtx.lineCap = 'round';
+
+            function toggleDrawing() {
+              isDrawingEnabled = !isDrawingEnabled;
+              if (isDrawingEnabled) {
+                drawToggleBtn.innerText = "✏️ Drawing: ON";
+                drawToggleBtn.className = "toggle-btn-on";
+              } else {
+                drawToggleBtn.innerText = "✏️ Drawing: OFF";
+                drawToggleBtn.className = "toggle-btn-off";
+                prevX = 0; prevY = 0;
+              }
+            }
 
             function clearAirCanvas() {
               drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
@@ -322,8 +339,8 @@ if sidebar_page == "🏠 Home":
                 const indexUp = landmarks[8].y < landmarks[6].y;
                 const middleUp = landmarks[12].y < landmarks[10].y;
 
-                if (indexUp && !middleUp) {
-                  statusDiv.innerText = "✍️ DRAWING MODE ACTIVE (Index Finger Drawing in Air)";
+                if (isDrawingEnabled && indexUp && !middleUp) {
+                  statusDiv.innerText = "✍️ DRAWING MODE ACTIVE (Index Finger Active)";
                   statusDiv.style.color = "#00ffff";
                   drawCtx.strokeStyle = currentColor;
                   if (prevX === 0 && prevY === 0) {
@@ -334,6 +351,10 @@ if sidebar_page == "🏠 Home":
                   drawCtx.lineTo(ix, iy);
                   drawCtx.stroke();
                   prevX = ix; prevY = iy;
+                } else if (!isDrawingEnabled) {
+                  statusDiv.innerText = "⏸️ DRAWING IS TURNED OFF (Click 'Drawing: ON' to start drawing)";
+                  statusDiv.style.color = "#ff5252";
+                  prevX = 0; prevY = 0;
                 } else {
                   statusDiv.innerText = "✌️ HOVER MODE (Raise 1 Index Finger to Draw)";
                   statusDiv.style.color = "#ffb74d";
