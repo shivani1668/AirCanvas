@@ -38,6 +38,9 @@ if "theme_mode" not in st.session_state:
 if "typed_question" not in st.session_state:
     st.session_state["typed_question"] = ""
 
+if "air_detector" not in st.session_state:
+    st.session_state["air_detector"] = AirCanvasDetector()
+
 # Secrets Check
 has_secrets_key = False
 try:
@@ -243,8 +246,8 @@ if sidebar_page == "🏠 Home":
             text_question_to_process = typed_val
 
     with input_tab4:
-        st.markdown("### 🖐️ Real-Time Browser Air Canvas (MediaPipe 3D Hand Landmark Tracking)")
-        st.write("Draw in the air live using your webcam! Raising 1 finger (index) draws colored lines on screen in real-time. Raising 2 fingers (index + middle) lets you hover or clear!")
+        st.markdown("### 🖐️ Real-Time Live Webcam Air Canvas")
+        st.write("See yourself on camera! Raising 1 index finger draws colored lines directly over your camera feed in real-time. Raising 2 fingers lets you hover or clear!")
 
         air_canvas_html = """
         <!DOCTYPE html>
@@ -255,9 +258,10 @@ if sidebar_page == "🏠 Home":
           <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
           <style>
             body { margin: 0; background: #000; color: #fff; font-family: system-ui, sans-serif; text-align: center; }
-            #canvas_container { position: relative; width: 640px; height: 480px; margin: 0 auto; }
-            video { transform: scaleX(-1); display: none; }
-            canvas { position: absolute; left: 0; top: 0; transform: scaleX(-1); border: 2px solid #1976d2; border-radius: 2px; }
+            #canvas_container { position: relative; width: 640px; height: 480px; margin: 0 auto; border: 2px solid #1976d2; border-radius: 2px; overflow: hidden; }
+            #webcam_video { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); object-fit: cover; z-index: 1; display: block !important; }
+            #drawing_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 2; }
+            #hand_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 3; }
             .btn-box { margin-top: 12px; display: flex; justify-content: center; gap: 10px; }
             button { background: #1976d2; color: white; border: 2px solid #1565c0; padding: 10px 18px; font-weight: bold; cursor: pointer; border-radius: 2px; font-size: 0.95rem; }
             button:hover { background: #1565c0; }
@@ -277,7 +281,7 @@ if sidebar_page == "🏠 Home":
             <button onclick="changeColor('#ff0000')">❤️ Red</button>
             <button onclick="changeColor('#ffff00')">💛 Yellow</button>
           </div>
-          <div id="status">🔍 Initializing MediaPipe Hand Tracking Camera...</div>
+          <div id="status">🔍 Initializing Live Camera Feed...</div>
 
           <script>
             const video = document.getElementById('webcam_video');
@@ -308,9 +312,9 @@ if sidebar_page == "🏠 Home":
               if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const landmarks = results.multiHandLandmarks[0];
 
-                // Render MediaPipe Hand Skeleton Joints
+                // Draw MediaPipe Hand Skeleton Joints directly over video
                 drawConnectors(handCtx, landmarks, HAND_CONNECTIONS, {color: '#00FF00', lineWidth: 3});
-                drawLandmarks(handCtx, landmarks, {color: '#FF0000', lineWidth: 2, radius: 4});
+                drawLandmarks(handCtx, landmarks, {color: '#FFFFFF', lineWidth: 2, radius: 4});
 
                 const ix = landmarks[8].x * handCanvas.width;
                 const iy = landmarks[8].y * handCanvas.height;
@@ -336,7 +340,7 @@ if sidebar_page == "🏠 Home":
                   prevX = 0; prevY = 0;
                 }
               } else {
-                statusDiv.innerText = "🖐️ Place your hand in front of the camera";
+                statusDiv.innerText = "🖐️ Place hand in front of camera";
                 statusDiv.style.color = "#b0bec5";
                 prevX = 0; prevY = 0;
               }
