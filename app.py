@@ -33,7 +33,7 @@ if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "Dark"
 
 if "typed_question" not in st.session_state:
-    st.session_state["typed_question"] = "∫ cos(2x) dx"
+    st.session_state["typed_question"] = ""
 
 # Secrets Check
 has_secrets_key = False
@@ -197,8 +197,6 @@ if sidebar_page == "🏠 Home":
                 image_to_process = Image.open(camera_file)
 
     with input_tab3:
-        st.write("Type or paste your math question / equation:")
-
         st.markdown("**Math Symbol Keyboard (Click symbol to insert):**")
         sym_col1, sym_col2, sym_col3, sym_col4, sym_col5, sym_col6 = st.columns(6)
 
@@ -224,7 +222,13 @@ if sidebar_page == "🏠 Home":
             if st.button("∞ (Infinity)"): append_symbol("∞")
             if st.button("≠ (Not Equal)"): append_symbol("≠")
 
-        typed_val = st.text_area("Question Text Area", value=st.session_state.get("typed_question", ""), height=100)
+        typed_val = st.text_area(
+            "Question Text Area",
+            value=st.session_state.get("typed_question", ""),
+            placeholder="Type question here...",
+            label_visibility="collapsed",
+            height=100
+        )
         st.session_state["typed_question"] = typed_val
 
         if st.button("✨ SOLVE TYPED QUESTION WITH AI", type="primary", use_container_width=True):
