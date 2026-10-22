@@ -45,7 +45,6 @@ else:
 
 user_api_key = st.sidebar.text_input("Custom Gemini API Key (Optional)", type="password", help="Leave blank if set in Cloud Secrets")
 
-# Optional Graph Checkbox
 show_graph_manual = st.sidebar.checkbox("📊 Show Function Graph", value=False)
 
 solver = GeminiMathSolver(api_key=user_api_key if user_api_key else None)
@@ -70,6 +69,22 @@ with tab2:
     if uploaded_file is not None:
         image_to_process = Image.open(uploaded_file)
 
+def render_step_with_larger_math(step_text: str):
+    """
+    Renders step explanation in regular font, and places the math calculation/formula
+    right below it on a new line in a larger, bold, readable font.
+    """
+    step_str = str(step_text).strip()
+    if ":" in step_str:
+        parts = step_str.split(":", 1)
+        explanation = parts[0].strip()
+        calc = parts[1].strip()
+        st.markdown(f"**• {explanation}:**")
+        if calc:
+            st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;### `{calc}`")
+    else:
+        st.markdown(f"• {step_str}")
+
 if image_to_process is not None:
     st.image(image_to_process, caption="Math Problem Image", use_column_width=True)
 
@@ -85,11 +100,11 @@ if image_to_process is not None:
 
             st.markdown("### 📝 Step-by-Step Breakdown:")
             for step in result['steps']:
-                st.write(f"- {step}")
+                render_step_with_larger_math(step)
 
+            st.markdown("---")
             st.info(f"### 💡 Final Answer: {result['final_answer']}")
 
-            # Graph Condition: ONLY if explicitly asked in question OR if user enabled graph checkbox
             expr_lower = result['expression'].lower()
             asked_for_graph = any(w in expr_lower for w in ["graph", "plot", "sketch", "curve", "draw"])
 
