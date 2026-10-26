@@ -49,23 +49,24 @@ try:
 except Exception:
     pass
 
-# Dark / Light Mode Switch Toggle
+# Theme mode toggle
 theme_toggle = st.sidebar.toggle("🌙 Dark Mode / ☀️ Light Mode", value=(st.session_state["theme_mode"] == "Dark"))
 st.session_state["theme_mode"] = "Dark" if theme_toggle else "Light"
 is_dark = (st.session_state["theme_mode"] == "Dark")
 
-# LEFT SIDEBAR DESIGN
+# SIDEBAR DESIGN MATCHING SCREENSHOT
 st.sidebar.markdown("""
-<div style='display: flex; align-items: center; gap: 12px; margin-bottom: 16px;'>
-    <div style='background: #1976d2; width: 40px; height: 40px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.4rem; color: white;'>A</div>
+<div style='display: flex; align-items: center; gap: 14px; margin-bottom: 24px; padding-top: 10px;'>
+    <div style='background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(59,130,246,0.4);'>
+        <span style='font-size: 1.5rem;'>🌌</span>
+    </div>
     <div>
-        <div style='font-weight: 900; font-size: 1.3rem;'>Air Canvas</div>
-        <div style='font-size: 0.8rem; font-weight: bold;'>AI Math Solver</div>
+        <div style='font-weight: 800; font-size: 1.25rem; color: #ffffff; letter-spacing: -0.5px;'>Air Canvas</div>
+        <div style='font-size: 0.75rem; font-weight: 600; color: #94a3b8;'>AI Math Solver</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Simplified 2-Option Sidebar Navigation
 sidebar_page = st.sidebar.radio(
     "Navigation Menu",
     ["🏠 Home", "⚙️ Settings & Login"],
@@ -74,83 +75,169 @@ sidebar_page = st.sidebar.radio(
 
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
-# Gemini AI Status Badge
-if has_secrets_key:
-    st.sidebar.markdown("""
-    <div style='background: #1b5e20; border: 2px solid #2e7d32; padding: 12px; border-radius: 2px; display: flex; align-items: center; gap: 10px;'>
-        <div style='width: 12px; height: 12px; border-radius: 2px; background: #4caf50;'></div>
+# Gemini AI Connected Status Badge matching screenshot
+st.sidebar.markdown("""
+<div style='background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.25) 100%); border: 1.5px solid #059669; padding: 14px 16px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(16,185,129,0.1);'>
+    <div style='display: flex; align-items: center; gap: 10px;'>
+        <div style='width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;'></div>
         <div>
-            <div style='font-size: 0.9rem; font-weight: 800; color: #ffffff;'>Gemini AI</div>
-            <div style='font-size: 0.75rem; color: #81c784; font-weight: bold;'>Connected</div>
+            <div style='font-size: 0.85rem; font-weight: 700; color: #ffffff;'>Gemini AI</div>
+            <div style='font-size: 0.75rem; color: #34d399; font-weight: 600;'>Connected</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
-else:
-    st.sidebar.markdown("""
-    <div style='background: #e65100; border: 2px solid #f57c00; padding: 12px; border-radius: 2px;'>
-        <div style='font-size: 0.9rem; font-weight: 800; color: #ffffff;'>🟡 Gemini AI Key Optional</div>
-        <div style='font-size: 0.72rem;'>Paste key below if needed</div>
-    </div>
-    """, unsafe_allow_html=True)
+    <div style='color: #10b981; font-size: 0.9rem;'>✓</div>
+</div>
+""", unsafe_allow_html=True)
 
 user_api_key = st.sidebar.text_input("Gemini API Key", type="password", help="Free key at aistudio.google.com")
 show_graph_manual = st.sidebar.checkbox("📊 Show Function Graph", value=False)
 
-st.sidebar.markdown("<br><div style='font-weight: bold; font-size: 0.85rem;'>Made with 💝 by Shivani</div>", unsafe_allow_html=True)
+st.sidebar.markdown("<br><div style='font-weight: 600; font-size: 0.82rem; color: #64748b; text-align: center;'>Made with ❤️ by Shivani</div>", unsafe_allow_html=True)
 
 solver = GeminiMathSolver(api_key=user_api_key if user_api_key else None)
 
-# Dynamic CSS Theme Injection
-if is_dark:
-    st.markdown("""
-    <style>
-        .stApp, [data-testid="stAppViewContainer"] {
-            background-color: #000000 !important;
-            color: #ffffff !important;
-        }
-        section[data-testid="stSidebar"], [data-testid="stSidebar"] > div {
-            background-color: #0c0d1a !important;
-            color: #ffffff !important;
-            border-right: 1px solid #1e2040 !important;
-        }
-        [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
-            color: #ffffff !important;
-        }
-        .hero-main-title { color: #ffffff !important; text-align: center !important; font-size: 3.8rem !important; font-weight: 900 !important; }
-        .hero-title { font-size: 3.2rem !important; font-weight: 800 !important; color: #ffffff !important; text-align: center; }
-        .hero-subtitle { font-size: 1.2rem !important; color: #b0bec5 !important; text-align: center; font-weight: 600 !important; }
-        .glass-card { background-color: #121212 !important; border: 2px solid #2c2c2c !important; border-radius: 2px !important; padding: 24px !important; margin-bottom: 20px !important; }
-        .category-card { background-color: #1a1a1a !important; border: 2px solid #333333 !important; border-radius: 2px !important; padding: 20px !important; color: #ffffff !important; }
-        .step-explanation { font-size: 1.15rem !important; font-weight: 700 !important; color: #ffffff !important; margin-top: 12px !important; }
-        .math-card { font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important; font-size: 1.5rem !important; font-weight: bold !important; background-color: #181818 !important; color: #388e3c !important; padding: 12px 20px !important; border-radius: 2px !important; margin-top: 6px !important; margin-bottom: 14px !important; border-left: 6px solid #1976d2 !important; display: block !important; }
-        .final-answer-box { font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important; font-size: 1.7rem !important; font-weight: bold !important; background-color: #0d47a1 !important; color: #ffffff !important; padding: 18px 24px !important; border-radius: 2px !important; border: 2px solid #1976d2 !important; margin-top: 20px !important; }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-        .stApp, [data-testid="stAppViewContainer"] {
-            background-color: #f8fafc !important;
-            color: #0f172a !important;
-        }
-        section[data-testid="stSidebar"], [data-testid="stSidebar"] > div {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-            border-right: 1px solid #cbd5e1 !important;
-        }
-        [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
-            color: #0f172a !important;
-        }
-        .hero-main-title { color: #1e1b4b !important; text-align: center !important; font-size: 3.8rem !important; font-weight: 900 !important; }
-        .hero-title { font-size: 3.2rem !important; font-weight: 800 !important; color: #1e1b4b !important; text-align: center; }
-        .hero-subtitle { font-size: 1.2rem !important; color: #475569 !important; text-align: center; font-weight: 600 !important; }
-        .glass-card { background-color: #ffffff !important; border: 2px solid #cbd5e1 !important; border-radius: 2px !important; padding: 24px !important; margin-bottom: 20px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }
-        .category-card { background-color: #ffffff !important; border: 2px solid #cbd5e1 !important; border-radius: 2px !important; padding: 20px !important; color: #0f172a !important; }
-        .step-explanation { font-size: 1.15rem !important; font-weight: 700 !important; color: #0f172a !important; margin-top: 12px !important; }
-        .math-card { font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important; font-size: 1.5rem !important; font-weight: bold !important; background-color: #f1f5f9 !important; color: #15803d !important; padding: 12px 20px !important; border-radius: 2px !important; margin-top: 6px !important; margin-bottom: 14px !important; border-left: 6px solid #2563eb !important; display: block !important; }
-        .final-answer-box { font-family: 'Times New Roman', 'Times', 'Cambria Math', 'Symbol', serif !important; font-size: 1.7rem !important; font-weight: bold !important; background-color: #eff6ff !important; color: #1d4ed8 !important; padding: 18px 24px !important; border-radius: 2px !important; border: 2px solid #2563eb !important; margin-top: 20px !important; }
-    </style>
-    """, unsafe_allow_html=True)
+# Advanced CSS with Animations & Exact Screenshot Styling
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    .stApp, [data-testid="stAppViewContainer"] {
+        background-color: #07090e !important;
+        color: #f8fafc !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    section[data-testid="stSidebar"], [data-testid="stSidebar"] > div {
+        background-color: #0b0f19 !important;
+        color: #f8fafc !important;
+        border-right: 1px solid #1a2234 !important;
+    }
+
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+        color: #cbd5e1 !important;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseGlow {
+        0% { box-shadow: 0 0 15px rgba(59,130,246,0.3); }
+        50% { box-shadow: 0 0 30px rgba(139,92,246,0.6); }
+        100% { box-shadow: 0 0 15px rgba(59,130,246,0.3); }
+    }
+
+    @keyframes floatAnim {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .animated-container {
+        animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .hero-banner-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+        border: 1px solid #312e81;
+        border-radius: 20px;
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        margin-bottom: 30px;
+        animation: fadeIn 0.7s ease-out forwards;
+    }
+
+    .hero-banner-card::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%);
+        border-radius: 50%;
+        z-index: 1;
+    }
+
+    .category-card-custom {
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .category-card-custom:hover {
+        transform: translateY(-5px);
+        border-color: #3b82f6;
+        box-shadow: 0 12px 30px rgba(59,130,246,0.25);
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    .recent-solutions-box {
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 16px;
+        padding: 28px;
+        margin-top: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    .math-card {
+        font-family: 'Times New Roman', serif;
+        font-size: 1.5rem;
+        font-weight: bold;
+        background: #0b0f19;
+        color: #34d399;
+        padding: 14px 22px;
+        border-radius: 12px;
+        margin-top: 8px;
+        margin-bottom: 16px;
+        border-left: 5px solid #3b82f6;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .final-answer-box {
+        font-family: 'Times New Roman', serif;
+        font-size: 1.7rem;
+        font-weight: bold;
+        background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);
+        color: #ffffff;
+        padding: 20px 26px;
+        border-radius: 14px;
+        border: 1px solid #3b82f6;
+        box-shadow: 0 8px 25px rgba(59,130,246,0.3);
+        margin-top: 24px;
+    }
+
+    /* Custom Gradient Buttons */
+    .stButton > button {
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+        color: white !important;
+        font-weight: 700 !important;
+        border-radius: 12px !important;
+        border: none !important;
+        padding: 10px 24px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(59,130,246,0.3) !important;
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(139,92,246,0.5) !important;
+        opacity: 0.95 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 def render_step_with_larger_math(step_text: str):
     step_str = str(step_text).strip()
@@ -158,30 +245,50 @@ def render_step_with_larger_math(step_text: str):
         parts = step_str.split(":", 1)
         explanation = parts[0].strip()
         calc = parts[1].strip()
-        st.markdown(f"<div class='step-explanation'>• {explanation}:</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size: 1.15rem; font-weight: 700; color: #f8fafc; margin-top: 14px;'>• {explanation}:</div>", unsafe_allow_html=True)
         if calc:
             display_calc = calc if calc.startswith("⇒") else f"⇒ {calc}"
             st.markdown(f"<div class='math-card'>{display_calc}</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div class='step-explanation'>• {step_str}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size: 1.15rem; font-weight: 700; color: #f8fafc; margin-top: 14px;'>• {step_str}</div>", unsafe_allow_html=True)
 
 # OPTION 1: HOME PAGE
 if sidebar_page == "🏠 Home":
-    st.markdown("""
-    <div style='text-align: center; margin-bottom: 16px;'>
-        <h1 class='hero-main-title'>🌌 Air Canvas</h1>
-        <div style='font-size: 1.25rem; font-weight: 800; color: #1976d2;'>AI Math Solver</div>
-    </div>
-    """, unsafe_allow_html=True)
 
-    st.markdown("<div style='text-align: center;'><span style='background-color: #1976d2; color: #ffffff; padding: 6px 16px; border-radius: 2px; font-size: 0.85rem; font-weight: 800;'>✨ AI-POWERED LEARNING</span></div>", unsafe_allow_html=True)
-    st.markdown("<h2 class='hero-title'>Math made simple.</h2>", unsafe_allow_html=True)
-    st.markdown("<p class='hero-subtitle'>Upload, snap, type, or draw live in the air with MediaPipe Hand Tracking. Learn at your pace.</p>", unsafe_allow_html=True)
-
+    # Hero Banner matching the screenshot design exactly
     st.markdown("""
-    <div class='glass-card' style='text-align: center; padding: 18px 24px; margin-bottom: 16px;'>
-        <div style='font-size: 1.4rem; font-weight: 900; color: #ffffff;'>✨ Made with 💝 by Shivani</div>
-        <div style='font-size: 0.9rem; color: #b0bec5; margin-top: 4px;'>Upload image, snap with camera, type equation, or draw live in the air</div>
+    <div class='hero-banner-card animated-container'>
+        <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 30px;'>
+            <div style='flex: 1; min-width: 280px; z-index: 2;'>
+                <div style='display: flex; align-items: center; gap: 14px; margin-bottom: 18px;'>
+                    <div style='background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(59,130,246,0.5);'>
+                        <span style='font-size: 1.8rem;'>🌌</span>
+                    </div>
+                    <div>
+                        <h1 style='font-size: 2.4rem; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.5px;'>Air Canvas</h1>
+                        <div style='font-size: 1.1rem; font-weight: 700; background: linear-gradient(90deg, #60a5fa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>AI Math Solver</div>
+                    </div>
+                </div>
+                <h2 style='font-size: 1.8rem; font-weight: 800; color: #ffffff; margin-bottom: 10px;'>Snap. Solve. Learn.</h2>
+                <p style='font-size: 1rem; color: #94a3b8; line-height: 1.6; margin-bottom: 24px; max-width: 480px;'>
+                    Upload, snap, type, or draw your math problem and get instant solutions with step-by-step explanations.
+                </p>
+            </div>
+
+            <div style='flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: center; z-index: 2;'>
+                <div style='background: linear-gradient(135deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1.5px solid rgba(59,130,246,0.3); border-radius: 20px; padding: 25px; width: 100%; max-width: 380px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); position: relative; animation: floatAnim 4s ease-in-out infinite;'>
+                    <div style='position: absolute; top: 12px; right: 15px; font-size: 0.9rem; color: #60a5fa;'>✨ Live AI Math Engine</div>
+                    <div style='font-family: "Times New Roman", serif; font-size: 1.4rem; color: #60a5fa; text-align: center; margin: 15px 0; padding: 15px; background: rgba(15,23,42,0.6); border-radius: 12px; border: 1px solid #334155;'>
+                        ∫ x² dx = <span style='color: #34d399;'>\u00frac{x³}{3} + C</span>
+                    </div>
+                    <div style='display: flex; justify-content: space-around; font-size: 1.1rem; color: #94a3b8; margin-top: 10px;'>
+                        <span>📐 Triangle</span>
+                        <span>π Pi</span>
+                        <span>√ Root</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -258,16 +365,16 @@ if sidebar_page == "🏠 Home":
           <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
           <style>
             body { margin: 0; background: #000; color: #fff; font-family: system-ui, sans-serif; text-align: center; }
-            #canvas_container { position: relative; width: 640px; height: 480px; margin: 0 auto; border: 2px solid #1976d2; border-radius: 2px; overflow: hidden; background: #121212; }
+            #canvas_container { position: relative; width: 640px; height: 480px; margin: 0 auto; border: 2px solid #3b82f6; border-radius: 12px; overflow: hidden; background: #0f172a; box-shadow: 0 10px 30px rgba(59,130,246,0.3); }
             #webcam_video { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); object-fit: cover; z-index: 1; display: none !important; }
             #drawing_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 2; }
             #hand_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 3; }
-            .btn-box { margin-top: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
-            button { background: #1976d2; color: white; border: 2px solid #1565c0; padding: 10px 18px; font-weight: bold; cursor: pointer; border-radius: 2px; font-size: 0.95rem; }
-            button:hover { background: #1565c0; }
-            .toggle-btn-on { background: #2e7d32 !important; border-color: #1b5e20 !important; }
-            .toggle-btn-off { background: #c62828 !important; border-color: #8e0000 !important; }
-            #status { margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #ff5252; }
+            .btn-box { margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+            button { background: #3b82f6; color: white; border: none; padding: 10px 18px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 0.95rem; transition: 0.2s; }
+            button:hover { background: #2563eb; transform: translateY(-1px); }
+            .toggle-btn-on { background: #059669 !important; }
+            .toggle-btn-off { background: #dc2626 !important; }
+            #status { margin-top: 12px; font-size: 1.05rem; font-weight: bold; color: #f87171; }
           </style>
         </head>
         <body>
@@ -279,10 +386,10 @@ if sidebar_page == "🏠 Home":
           <div class="btn-box">
             <button id="draw_toggle_btn" class="toggle-btn-off" onclick="toggleDrawing()">📹 Air Camera & Drawing: OFF</button>
             <button onclick="clearAirCanvas()">🧹 Clear Canvas</button>
-            <button onclick="changeColor('#00ffff')">🩵 Cyan</button>
-            <button onclick="changeColor('#00ff00')">💚 Green</button>
-            <button onclick="changeColor('#ff0000')">❤️ Red</button>
-            <button onclick="changeColor('#ffff00')">💛 Yellow</button>
+            <button onclick="changeColor('#38bdf8')">🩵 Cyan</button>
+            <button onclick="changeColor('#34d399')">💚 Green</button>
+            <button onclick="changeColor('#f87171')">❤️ Red</button>
+            <button onclick="changeColor('#facc15')">💛 Yellow</button>
           </div>
           <div id="status">🛑 Camera & Air Drawing Turned OFF (Click button above to start)</div>
 
@@ -296,7 +403,7 @@ if sidebar_page == "🏠 Home":
             const drawToggleBtn = document.getElementById('draw_toggle_btn');
 
             let isDrawingEnabled = false;
-            let currentColor = '#00ffff';
+            let currentColor = '#38bdf8';
             let prevX = 0, prevY = 0;
             let camera = null;
 
@@ -333,7 +440,7 @@ if sidebar_page == "🏠 Home":
                 }
                 camera.start();
                 statusDiv.innerText = "🔍 Camera & Air Drawing Started";
-                statusDiv.style.color = "#4caf50";
+                statusDiv.style.color = "#34d399";
               } else {
                 drawToggleBtn.innerText = "📹 Air Camera & Drawing: OFF";
                 drawToggleBtn.className = "toggle-btn-off";
@@ -341,7 +448,7 @@ if sidebar_page == "🏠 Home":
                 video.style.display = "none";
                 handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
                 statusDiv.innerText = "🛑 Camera & Air Drawing Turned OFF";
-                statusDiv.style.color = "#ff5252";
+                statusDiv.style.color = "#f87171";
                 prevX = 0; prevY = 0;
               }
             }
@@ -355,7 +462,6 @@ if sidebar_page == "🏠 Home":
               currentColor = col;
             }
 
-            // Immediately stop camera tracks when tab or page switches
             window.addEventListener('beforeunload', stopWebcamStream);
             window.addEventListener('unload', stopWebcamStream);
             document.addEventListener('visibilitychange', () => {
@@ -367,10 +473,8 @@ if sidebar_page == "🏠 Home":
 
               if (isDrawingEnabled && results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const landmarks = results.multiHandLandmarks[0];
-
-                // Draw MediaPipe Hand Skeleton Joints directly over video
-                drawConnectors(handCtx, landmarks, HAND_CONNECTIONS, {color: '#00FF00', lineWidth: 3});
-                drawLandmarks(handCtx, landmarks, {color: '#FFFFFF', lineWidth: 2, radius: 4});
+                drawConnectors(handCtx, landmarks, HAND_CONNECTIONS, {color: '#34d399', lineWidth: 3});
+                drawLandmarks(handCtx, landmarks, {color: '#ffffff', lineWidth: 2, radius: 4});
 
                 const ix = landmarks[8].x * handCanvas.width;
                 const iy = landmarks[8].y * handCanvas.height;
@@ -380,7 +484,7 @@ if sidebar_page == "🏠 Home":
 
                 if (indexUp && !middleUp) {
                   statusDiv.innerText = "✍️ DRAWING MODE ACTIVE (Index Finger Active)";
-                  statusDiv.style.color = "#00ffff";
+                  statusDiv.style.color = "#38bdf8";
                   drawCtx.strokeStyle = currentColor;
                   if (prevX === 0 && prevY === 0) {
                     prevX = ix; prevY = iy;
@@ -397,11 +501,11 @@ if sidebar_page == "🏠 Home":
                 }
               } else if (!isDrawingEnabled) {
                 statusDiv.innerText = "🛑 Camera & Air Drawing Turned OFF";
-                statusDiv.style.color = "#ff5252";
+                statusDiv.style.color = "#f87171";
                 prevX = 0; prevY = 0;
               } else {
                 statusDiv.innerText = "🖐️ Place hand in front of camera";
-                statusDiv.style.color = "#b0bec5";
+                statusDiv.style.color = "#94a3b8";
                 prevX = 0; prevY = 0;
               }
             }
@@ -420,7 +524,6 @@ if sidebar_page == "🏠 Home":
         """
         st.components.v1.html(air_canvas_html, height=620)
 
-        # Upload air canvas snapshot for AI solution
         st.markdown("---")
         st.write("📷 **Snap & Solve Air Canvas Drawing**:")
         air_snap = st.file_uploader("Upload or Snap Air Canvas Drawing to Solve", type=["png", "jpg", "jpeg"], key="air_snap_file")
@@ -471,45 +574,108 @@ if sidebar_page == "🏠 Home":
                     except Exception:
                         pass
 
-    # "What can you solve?" Grid
-    st.markdown("### What can you solve?")
+    # "What can you solve?" Grid matching screenshot exactly
+    st.markdown("""
+    <div style='margin-top: 40px; margin-bottom: 20px;'>
+        <div style='font-size: 1.4rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 10px;'>
+            <span>✨</span> What can you solve?
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.markdown("<div class='category-card'><div style='font-size: 1.8rem; color: #ab47bc; font-weight: bold;'>Σ</div><div style='font-weight: 800; font-size: 1.1rem;'>Algebra</div><div style='font-size: 0.85rem;'>Equations and expressions</div></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("<div class='category-card'><div style='font-size: 1.8rem; color: #1976d2; font-weight: bold;'>📈</div><div style='font-weight: 800; font-size: 1.1rem;'>Calculus</div><div style='font-size: 0.85rem;'>Limits, derivatives, integrals</div></div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown("<div class='category-card'><div style='font-size: 1.8rem; color: #388e3c; font-weight: bold;'>📐</div><div style='font-weight: 800; font-size: 1.1rem;'>Geometry</div><div style='font-size: 0.85rem;'>Shapes, theorems and proofs</div></div>", unsafe_allow_html=True)
-    with col4:
-        st.markdown("<div class='category-card'><div style='font-size: 1.8rem; color: #f57c00; font-weight: bold;'>🧠</div><div style='font-weight: 800; font-size: 1.1rem;'>Practice</div><div style='font-size: 0.85rem;'>Quizzes and hints</div></div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class='category-card-custom'>
+            <div style='background: rgba(147, 51, 234, 0.15); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(147, 51, 234, 0.3);'>
+                <span style='font-size: 1.3rem; color: #c084fc; font-weight: bold;'>Σ</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #ffffff; margin-bottom: 6px;'>Algebra</div>
+            <div style='font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 20px;'>Equations and expressions</div>
+            <div style='color: #60a5fa; font-weight: 700; font-size: 0.9rem;'>→</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # "Recent Solutions" Section
-    st.markdown("### Recent Solutions")
+    with col2:
+        st.markdown("""
+        <div class='category-card-custom'>
+            <div style='background: rgba(59, 130, 246, 0.15); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(59, 130, 246, 0.3);'>
+                <span style='font-size: 1.3rem; color: #60a5fa; font-weight: bold;'>📈</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #ffffff; margin-bottom: 6px;'>Calculus</div>
+            <div style='font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 20px;'>Limits, derivatives, integrals</div>
+            <div style='color: #60a5fa; font-weight: 700; font-size: 0.9rem;'>→</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown("""
+        <div class='category-card-custom'>
+            <div style='background: rgba(16, 185, 129, 0.15); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(16, 185, 129, 0.3);'>
+                <span style='font-size: 1.3rem; color: #34d399; font-weight: bold;'>📐</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #ffffff; margin-bottom: 6px;'>Geometry</div>
+            <div style='font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 20px;'>Shapes, theorems and proofs</div>
+            <div style='color: #60a5fa; font-weight: 700; font-size: 0.9rem;'>→</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col4:
+        st.markdown("""
+        <div class='category-card-custom'>
+            <div style='background: rgba(236, 72, 153, 0.15); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 1px solid rgba(236, 72, 153, 0.3);'>
+                <span style='font-size: 1.3rem; color: #f472b6; font-weight: bold;'>🧠</span>
+            </div>
+            <div style='font-weight: 800; font-size: 1.15rem; color: #ffffff; margin-bottom: 6px;'>Practice</div>
+            <div style='font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 20px;'>Quizzes and hints</div>
+            <div style='color: #60a5fa; font-weight: 700; font-size: 0.9rem;'>→</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # "Recent Solutions" Section matching screenshot
+    st.markdown("""
+    <div class='recent-solutions-box'>
+        <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;'>
+            <div style='display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; color: #ffffff;'>
+                <span>🕒</span> Recent Solutions
+            </div>
+            <div style='color: #60a5fa; font-size: 0.9rem; font-weight: 700; cursor: pointer;'>View All →</div>
+        </div>
+    """, unsafe_allow_html=True)
+
     if not st.session_state["history"]:
-        st.info("No recent solutions yet. Upload a math question above to see it here!")
+        st.markdown("""
+        <div style='text-align: center; padding: 40px 20px;'>
+            <div style='font-size: 2.2rem; margin-bottom: 12px;'>✨ π ✨</div>
+            <div style='font-weight: 700; font-size: 1.05rem; color: #ffffff; margin-bottom: 6px;'>No recent solutions yet.</div>
+            <div style='font-size: 0.85rem; color: #94a3b8;'>Upload a math question above to see it here!</div>
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
     else:
         hist_cols = st.columns(min(4, len(st.session_state["history"])))
         for idx, item in enumerate(reversed(st.session_state["history"][:4])):
             with hist_cols[idx]:
                 st.markdown(f"""
-                <div class='category-card'>
-                    <div style='font-weight: 800; font-size: 1rem;'>{item['expression']}</div>
-                    <div style='font-size: 0.8rem; color: #1976d2; margin-top: 4px; font-weight: bold;'>{item['category']}</div>
-                    <div style='font-size: 0.9rem; font-weight: 900; color: #388e3c; margin-top: 8px;'>Ans: {item['final_answer']}</div>
+                <div style='background: #0b0f19; border: 1px solid #1e293b; border-radius: 12px; padding: 16px;'>
+                    <div style='font-weight: 800; font-size: 1rem; color: #ffffff;'>{item['expression']}</div>
+                    <div style='font-size: 0.8rem; color: #60a5fa; margin-top: 4px; font-weight: bold;'>{item['category']}</div>
+                    <div style='font-size: 0.9rem; font-weight: 900; color: #34d399; margin-top: 8px;'>Ans: {item['final_answer']}</div>
                 </div>
                 """, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    # App Footer
+    # Footer matching screenshot
     st.markdown("---")
-    st.markdown("<div style='text-align: center; font-size: 1.1rem; font-weight: 800; color: #1976d2;'>✨ Made with 💝 by Shivani ✨</div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; font-size: 0.9rem; font-weight: 700; color: #64748b; padding-bottom: 20px;'>✨ Made with ❤️ by Shivani ✨</div>", unsafe_allow_html=True)
 
 # OPTION 2: SETTINGS & LOGIN PAGE
 elif sidebar_page == "⚙️ Settings & Login":
     st.title("⚙️ Settings & Login Account")
     st.caption("Manage your profile, Gemini AI Key, and app settings")
 
-    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+    st.markdown("<div class='recent-solutions-box'>", unsafe_allow_html=True)
     st.markdown("### 👤 User Account & Profile")
 
     if "logged_in_user" not in st.session_state:
@@ -530,7 +696,7 @@ elif sidebar_page == "⚙️ Settings & Login":
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+    st.markdown("<div class='recent-solutions-box' style='margin-top: 20px;'>", unsafe_allow_html=True)
     st.markdown("### 🤖 Gemini AI Connection Status")
     if has_secrets_key:
         st.success("🟢 Google Gemini AI Connected via Cloud Secrets")
