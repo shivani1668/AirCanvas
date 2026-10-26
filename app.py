@@ -259,7 +259,7 @@ if sidebar_page == "🏠 Home":
           <style>
             body { margin: 0; background: #000; color: #fff; font-family: system-ui, sans-serif; text-align: center; }
             #canvas_container { position: relative; width: 640px; height: 480px; margin: 0 auto; border: 2px solid #1976d2; border-radius: 2px; overflow: hidden; background: #121212; }
-            #webcam_video { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); object-fit: cover; z-index: 1; display: block !important; }
+            #webcam_video { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); object-fit: cover; z-index: 1; display: none !important; }
             #drawing_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 2; }
             #hand_canvas { position: absolute; left: 0; top: 0; width: 640px; height: 480px; transform: scaleX(-1); z-index: 3; }
             .btn-box { margin-top: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
@@ -267,7 +267,7 @@ if sidebar_page == "🏠 Home":
             button:hover { background: #1565c0; }
             .toggle-btn-on { background: #2e7d32 !important; border-color: #1b5e20 !important; }
             .toggle-btn-off { background: #c62828 !important; border-color: #8e0000 !important; }
-            #status { margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #4caf50; }
+            #status { margin-top: 10px; font-size: 1.1rem; font-weight: bold; color: #ff5252; }
           </style>
         </head>
         <body>
