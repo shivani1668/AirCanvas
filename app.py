@@ -277,14 +277,14 @@ if sidebar_page == "🏠 Home":
             <canvas id="hand_canvas" width="640" height="480"></canvas>
           </div>
           <div class="btn-box">
-            <button id="draw_toggle_btn" class="toggle-btn-on" onclick="toggleDrawing()">📹 Air Camera & Drawing: ON</button>
+            <button id="draw_toggle_btn" class="toggle-btn-off" onclick="toggleDrawing()">📹 Air Camera & Drawing: OFF</button>
             <button onclick="clearAirCanvas()">🧹 Clear Canvas</button>
             <button onclick="changeColor('#00ffff')">🩵 Cyan</button>
             <button onclick="changeColor('#00ff00')">💚 Green</button>
             <button onclick="changeColor('#ff0000')">❤️ Red</button>
             <button onclick="changeColor('#ffff00')">💛 Yellow</button>
           </div>
-          <div id="status">🔍 Initializing Live Camera Feed...</div>
+          <div id="status">🛑 Camera & Air Drawing Turned OFF (Click button above to start)</div>
 
           <script>
             const video = document.getElementById('webcam_video');
@@ -295,7 +295,7 @@ if sidebar_page == "🏠 Home":
             const statusDiv = document.getElementById('status');
             const drawToggleBtn = document.getElementById('draw_toggle_btn');
 
-            let isDrawingEnabled = true;
+            let isDrawingEnabled = false;
             let currentColor = '#00ffff';
             let prevX = 0, prevY = 0;
             let camera = null;
@@ -320,7 +320,18 @@ if sidebar_page == "🏠 Home":
                 drawToggleBtn.innerText = "📹 Air Camera & Drawing: ON";
                 drawToggleBtn.className = "toggle-btn-on";
                 video.style.display = "block";
-                if (camera) camera.start();
+                if (!camera) {
+                  camera = new Camera(video, {
+                    onFrame: async () => {
+                      if (isDrawingEnabled) {
+                        await hands.send({image: video});
+                      }
+                    },
+                    width: 640,
+                    height: 480
+                  });
+                }
+                camera.start();
                 statusDiv.innerText = "🔍 Camera & Air Drawing Started";
                 statusDiv.style.color = "#4caf50";
               } else {
@@ -403,17 +414,6 @@ if sidebar_page == "🏠 Home":
               minTrackingConfidence: 0.7
             });
             hands.onResults(onResults);
-
-            camera = new Camera(video, {
-              onFrame: async () => {
-                if (isDrawingEnabled) {
-                  await hands.send({image: video});
-                }
-              },
-              width: 640,
-              height: 480
-            });
-            camera.start();
           </script>
         </body>
         </html>
